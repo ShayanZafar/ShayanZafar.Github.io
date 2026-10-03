@@ -1163,6 +1163,102 @@ svg {
   height: 0.9375rem;
 }
 
+/* Repositories listed automatically from GitHub */
+
+.more-repos {
+  margin-top: 2.25rem;
+}
+
+.more-repos[hidden] {
+  display: none;
+}
+
+.repos {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.875rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.repo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+}
+
+.repo__name {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.repo__name:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.repo__desc {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.repo__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: auto;
+  padding-top: 0.25rem;
+  color: var(--text-faint);
+  font-size: 0.8125rem;
+}
+
+.repo__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.repo__dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+}
+
+.repo__link {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.projects__all {
+  margin-top: 1.5rem;
+}
+
+.projects__all a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.projects__all a:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 40rem) {
+  .repos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (min-width: 40rem) {
   .mini-projects {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -31,10 +31,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Newsreader:opsz,wght@6..72,400..600&display=swap">
-  <link rel="stylesheet" href="assets/css/styles.css?v=2026-10-03">
+  <link rel="stylesheet" href="assets/css/styles.css?v=2026-10-03b">
 
   <script>document.documentElement.classList.add('js')</script>
-  <script src="assets/js/main.js?v=2026-10-03" defer></script>
+  <script src="assets/js/main.js?v=2026-10-03b" defer></script>
 
   <script type="application/ld+json">
   {
@@ -77,8 +77,8 @@
         <ul>
           <li><a href="#about">About</a></li>
           <li><a href="#how-i-lead">How I lead</a></li>
-          <li><a href="#projects">Projects</a></li>
           <li><a href="#career">Career</a></li>
+          <li><a href="#projects">Projects</a></li>
         </ul>
       </nav>
       <a class="btn btn--primary btn--sm" href="#contact">Get in touch</a>
@@ -300,109 +300,11 @@
       </div>
     </section>
 
-    <!-- Projects -->
-    <section class="section" id="projects" aria-labelledby="projects-title">
-      <div class="container section__grid">
-        <header class="section__head">
-          <span class="section__num">03</span>
-          <h2 class="section__title" id="projects-title">Projects</h2>
-          <p class="section__intro">What I build outside the day job, straight from <a href="https://github.com/ShayanZafar" target="_blank" rel="noopener">GitHub</a>.</p>
-        </header>
-        <div class="section__body">
-          <article class="project" aria-labelledby="tf-title">
-            <figure class="project__shot">
-              <div class="browser-bar" aria-hidden="true"><span></span><span></span><span></span><p>ThirteenF · Overview</p></div>
-              <picture>
-                <source srcset="assets/img/projects/thirteenf-overview-dark.jpg" media="(prefers-color-scheme: dark)">
-                <img src="assets/img/projects/thirteenf-overview-light.jpg" alt="ThirteenF’s Overview screen: a watchlist table showing how many funds hold each stock, quarter over quarter" width="1200" height="750" loading="lazy" decoding="async">
-              </picture>
-            </figure>
-
-            <div class="project__body">
-              <div class="project__meta">
-                <span class="project__kind">Side project · In active development</span>
-                <span class="project__updated" data-gh-updated="ShayanZafar/ThirteenF">Updated <time datetime="2026-10-03">Oct 3, 2026</time></span>
-              </div>
-              <h3 class="project__title" id="tf-title">ThirteenF</h3>
-              <p class="project__tagline">Are more funds holding it, or fewer?</p>
-              <p class="project__desc">
-                A data app that answers one question for every US-listed stock: are more funds holding it this quarter,
-                or fewer? It loads the SEC’s Form 13F filings into a local database, ranks the whole market by the change,
-                and lets you look up any stock or fund manager.
-              </p>
-
-              <div class="project__cols">
-                <div>
-                  <h4 class="mini-heading">How it’s built</h4>
-                  <ul class="project__points">
-                    <li>Python 3.12, DuckDB, FastAPI and Jinja2. Charts are SVG rendered on the server, with no front-end framework.</li>
-                    <li>Raw SEC files are never edited, so every number can be rebuilt from source, and share totals must pass an implied-price check before they’re shown.</li>
-                    <li>Built phase by phase from a written plan. Each phase ships only after its check passes, and tests compare results with published reference numbers.</li>
-                    <li>Maps securities to tickers through the OpenFIGI API and stays within the SEC’s rate limits.</li>
-                    <li>Developed with an AI pair programmer (Claude Code), guided by the project’s own design system and build plan.</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 class="mini-heading">
-                    Recent commits
-                    <span class="live-badge" data-gh-live hidden><span class="live-badge__dot" aria-hidden="true"></span>Live</span>
-                  </h4>
-                  <ol class="commits" data-gh-commits="ShayanZafar/ThirteenF">
-                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/ba70480f1826148c456470a6bba5c13ad4e3e23c"><time datetime="2026-10-03T16:03:34Z">Oct 3</time><span>Show where the money moves: net 13F flow, who moved, manager pages (Phase 7)</span></a></li>
-                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/5452f1f1367481746e76e40be3b66f64436a924c"><time datetime="2026-10-03T01:30:37Z">Oct 2</time><span>Split Biggest changes into All, Stocks and ETFs tabs</span></a></li>
-                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/0e0c98f49efd5da71d7b82b000c75c73d1e6df76"><time datetime="2026-10-03T01:21:09Z">Oct 2</time><span>Map CUSIPs to tickers with OpenFIGI and search by ticker (Phase 6)</span></a></li>
-                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/be7819977a7d2c6c94a5a107260133404607dd53"><time datetime="2026-10-02T20:31:28Z">Oct 2</time><span>Add the Overview page and an editable watchlist (Phase 5)</span></a></li>
-                  </ol>
-                </div>
-              </div>
-
-              <div class="project__foot">
-                <ul class="tags" aria-label="Technologies">
-                  <li>Python</li><li>DuckDB</li><li>FastAPI</li><li>Jinja2</li><li>SVG</li><li>pytest</li><li>OpenFIGI</li>
-                </ul>
-                <a class="btn btn--secondary btn--sm" href="https://github.com/ShayanZafar/ThirteenF" target="_blank" rel="noopener">
-                  <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-github"/></svg>
-                  View on GitHub
-                </a>
-              </div>
-            </div>
-          </article>
-
-          <div class="mini-projects">
-            <article class="mini-project">
-              <p class="project__kind">Open source · 2013</p>
-              <h3 class="mini-project__title">WebVTT parser</h3>
-              <p class="mini-project__text">
-                Two merged pull requests to webvtt, an open-source C library for parsing WebVTT, the caption format behind
-                HTML5 video: refactored the escape-character unit tests for UTF-8 and fixed pointer syntax in the
-                cue-text parser.
-              </p>
-              <p class="mini-project__links">
-                <a href="https://github.com/caitp/webvtt/commit/4b667eb06a" target="_blank" rel="noopener">PR #94<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a>
-                <a href="https://github.com/caitp/webvtt/commit/6be168a28e" target="_blank" rel="noopener">PR #96<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a>
-              </p>
-            </article>
-            <article class="mini-project">
-              <p class="project__kind">This site · 2026</p>
-              <h3 class="mini-project__title">shayanzafar.github.io</h3>
-              <p class="mini-project__text">
-                Hand-built HTML and CSS with no framework or build step. The résumé PDF is generated from the page’s own
-                print stylesheet, and ThirteenF’s recent commits load live from the GitHub API.
-              </p>
-              <p class="mini-project__links">
-                <a href="https://github.com/ShayanZafar/ShayanZafar.Github.io" target="_blank" rel="noopener">View source<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a>
-              </p>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Career (printed as the résumé's Experience section) -->
     <section class="section" id="career" aria-labelledby="career-title">
       <div class="container section__grid">
         <header class="section__head">
-          <span class="section__num">04</span>
+          <span class="section__num">03</span>
           <h2 class="section__title" id="career-title"><span class="screen-only">Career</span><span class="print-only">Experience</span></h2>
           <p class="section__intro">
             The short version. Every detail is on
@@ -570,6 +472,114 @@
             <span class="career-edu__label">Education</span>
             <span class="career-edu__what"><strong>Bachelor of Technology, Software Development</strong> · Seneca Polytechnic</span>
             <span class="career-edu__when">2008 – 2013</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="container section__grid">
+        <header class="section__head">
+          <span class="section__num">04</span>
+          <h2 class="section__title" id="projects-title">Projects</h2>
+          <p class="section__intro">What I build outside the day job, straight from <a href="https://github.com/ShayanZafar" target="_blank" rel="noopener">GitHub</a>.</p>
+        </header>
+        <div class="section__body">
+          <article class="project" aria-labelledby="tf-title">
+            <figure class="project__shot">
+              <div class="browser-bar" aria-hidden="true"><span></span><span></span><span></span><p>ThirteenF · Overview</p></div>
+              <picture>
+                <source srcset="assets/img/projects/thirteenf-overview-dark.jpg" media="(prefers-color-scheme: dark)">
+                <img src="assets/img/projects/thirteenf-overview-light.jpg" alt="ThirteenF’s Overview screen: a watchlist table showing how many funds hold each stock, quarter over quarter" width="1200" height="750" loading="lazy" decoding="async">
+              </picture>
+            </figure>
+
+            <div class="project__body">
+              <div class="project__meta">
+                <span class="project__kind" data-gh-kind="ShayanZafar/ThirteenF">Side project · In active development</span>
+                <span class="project__updated" data-gh-updated="ShayanZafar/ThirteenF">Updated <time datetime="2026-10-03">Oct 3, 2026</time></span>
+              </div>
+              <h3 class="project__title" id="tf-title">ThirteenF</h3>
+              <p class="project__tagline">Are more funds holding it, or fewer?</p>
+              <p class="project__desc">
+                A data app that answers one question for every US-listed stock: are more funds holding it this quarter,
+                or fewer? It loads the SEC’s Form 13F filings into a local database, ranks the whole market by the change,
+                and lets you look up any stock or fund manager.
+              </p>
+
+              <div class="project__cols">
+                <div>
+                  <h4 class="mini-heading">How it’s built</h4>
+                  <ul class="project__points">
+                    <li>Python 3.12, DuckDB, FastAPI and Jinja2. Charts are SVG rendered on the server, with no front-end framework.</li>
+                    <li>Raw SEC files are never edited, so every number can be rebuilt from source, and share totals must pass an implied-price check before they’re shown.</li>
+                    <li>Built phase by phase from a written plan. Each phase ships only after its check passes, and tests compare results with published reference numbers.</li>
+                    <li>Maps securities to tickers through the OpenFIGI API and stays within the SEC’s rate limits.</li>
+                    <li>Developed with an AI pair programmer (Claude Code), guided by the project’s own design system and build plan.</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="mini-heading">
+                    Recent commits
+                    <span class="live-badge" data-gh-live hidden><span class="live-badge__dot" aria-hidden="true"></span>Live</span>
+                  </h4>
+                  <ol class="commits" data-gh-commits="ShayanZafar/ThirteenF">
+                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/ba70480f1826148c456470a6bba5c13ad4e3e23c"><time datetime="2026-10-03T16:03:34Z">Oct 3</time><span>Show where the money moves: net 13F flow, who moved, manager pages (Phase 7)</span></a></li>
+                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/5452f1f1367481746e76e40be3b66f64436a924c"><time datetime="2026-10-03T01:30:37Z">Oct 2</time><span>Split Biggest changes into All, Stocks and ETFs tabs</span></a></li>
+                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/0e0c98f49efd5da71d7b82b000c75c73d1e6df76"><time datetime="2026-10-03T01:21:09Z">Oct 2</time><span>Map CUSIPs to tickers with OpenFIGI and search by ticker (Phase 6)</span></a></li>
+                    <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/be7819977a7d2c6c94a5a107260133404607dd53"><time datetime="2026-10-02T20:31:28Z">Oct 2</time><span>Add the Overview page and an editable watchlist (Phase 5)</span></a></li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="project__foot">
+                <ul class="tags" aria-label="Technologies">
+                  <li>Python</li><li>DuckDB</li><li>FastAPI</li><li>Jinja2</li><li>SVG</li><li>pytest</li><li>OpenFIGI</li>
+                </ul>
+                <a class="btn btn--secondary btn--sm" href="https://github.com/ShayanZafar/ThirteenF" target="_blank" rel="noopener">
+                  <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-github"/></svg>
+                  View on GitHub
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <div class="mini-projects">
+            <article class="mini-project">
+              <p class="project__kind">Open source · 2013</p>
+              <h3 class="mini-project__title">WebVTT parser</h3>
+              <p class="mini-project__text">
+                Two merged pull requests to webvtt, an open-source C library for parsing WebVTT, the caption format behind
+                HTML5 video: refactored the escape-character unit tests for UTF-8 and fixed pointer syntax in the
+                cue-text parser.
+              </p>
+              <p class="mini-project__links">
+                <a href="https://github.com/caitp/webvtt/commit/4b667eb06a" target="_blank" rel="noopener">PR #94<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a>
+                <a href="https://github.com/caitp/webvtt/commit/6be168a28e" target="_blank" rel="noopener">PR #96<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a>
+              </p>
+            </article>
+            <article class="mini-project">
+              <p class="project__kind">This site · 2026</p>
+              <h3 class="mini-project__title">shayanzafar.github.io</h3>
+              <p class="mini-project__text">
+                Hand-built HTML and CSS with no framework or build step. The résumé PDF is generated from the page’s own
+                print stylesheet, and the project activity here updates itself from the GitHub API.
+              </p>
+              <p class="mini-project__links">
+                <a href="https://github.com/ShayanZafar/ShayanZafar.Github.io" target="_blank" rel="noopener">View source<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a>
+              </p>
+            </article>
+          </div>
+
+          <!-- Filled in live from the GitHub API: own public repos (never forks, or archived ones) pushed in the
+               last data-gh-days days, plus any tagged "portfolio". Tag a repo "hide-from-site" to leave it out. -->
+          <div class="more-repos" data-gh-repos-block hidden>
+            <h3 class="mini-heading">More on GitHub</h3>
+            <ul class="repos" data-gh-repos="ShayanZafar" data-gh-exclude="ShayanZafar.Github.io, ThirteenF, CImg" data-gh-days="365" data-gh-max="6"></ul>
+          </div>
+          <p class="projects__all">
+            <a href="https://github.com/ShayanZafar?tab=repositories&amp;type=source" target="_blank" rel="noopener">All repositories on GitHub<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a>
           </p>
         </div>
       </div>
