@@ -13,6 +13,7 @@ No build step: what's in this repo is exactly what gets served.
 | `index.html` | All page content: about, expertise, experience, skills, education, contact |
 | `assets/css/styles.css` | Styles, including automatic dark mode and the print/PDF résumé layout |
 | `assets/js/main.js` | Small enhancements: auto-updating "years of experience", "show more" toggles, active nav link |
+| `assets/img/shayan-zafar-ahmad.jpg` | Portrait used in the hero (600×600, face-centred crop, metadata stripped) |
 | `assets/img/og-image.png` | Link-preview image shown when the URL is shared on LinkedIn, Slack, etc. (1200×627) |
 | `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, generated from the page's print layout |
 | `favicon.svg`, `apple-touch-icon.png` | Browser tab and home-screen icons |

@@ -413,7 +413,7 @@ svg {
 
 .hero__grid {
   display: grid;
-  gap: 2.5rem;
+  gap: 1.5rem;
 }
 
 .hero__name {
@@ -449,12 +449,30 @@ svg {
   font-size: 0.9375rem;
 }
 
+/* Small avatar above the name on phones; large portrait beside it on desktop. */
+.hero__portrait {
+  order: -1;
+  position: relative;
+  width: 6.5rem;
+  aspect-ratio: 1;
+}
+
+.hero__portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 3px solid var(--bg-elevated);
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  box-shadow: 0 0 0 1px var(--border), var(--shadow-md);
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
-  align-self: center;
-  margin: 0;
+  margin: clamp(2.5rem, 2rem + 2vw, 3.5rem) 0 0;
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -533,6 +551,10 @@ svg {
 }
 
 @media (min-width: 40rem) {
+  .hero__portrait {
+    width: 7.5rem;
+  }
+
   .stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -545,12 +567,29 @@ svg {
     gap: 4rem;
   }
 
-  .stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .hero__portrait {
+    order: 0;
+    justify-self: center;
+    width: min(100%, 20rem);
+  }
+
+  .hero__portrait img {
+    border-width: 6px;
+  }
+
+  /* Soft accent halo with a thin orbit ring behind the portrait */
+  .hero__portrait::before {
+    content: "";
+    position: absolute;
+    inset: -1.25rem;
+    z-index: -1;
+    border: 1px solid rgb(var(--accent-rgb) / 0.22);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(var(--accent-rgb) / 0.14), transparent);
   }
 
   .stat {
-    padding: 1.75rem 1.5rem;
+    padding: 1.5rem;
   }
 }
 
@@ -1199,6 +1238,7 @@ svg {
   .hero__lede,
   .hero__actions,
   .hero__meta,
+  .hero__portrait,
   .stats,
   .worked-at,
   #about,
