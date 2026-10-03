@@ -6,14 +6,18 @@ Personal website of **Shayan Zafar Ahmad**, Senior Software Engineering Manager,
 A fast, dependency-free static site (HTML, CSS, and a little JavaScript) hosted free on GitHub Pages.
 No build step: what's in this repo is exactly what gets served.
 
+It's meant to complement LinkedIn, not repeat it: how I lead, what I build (pulled from GitHub), and a compact
+career summary. The full résumé lives in the downloadable PDF.
+
 ## What's here
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` | All page content: about, expertise, experience, skills, education, contact |
+| `index.html` | All page content: about and *Now*, how I lead, projects, career, contact. Skills and education are print-only (they appear in the PDF) |
 | `assets/css/styles.css` | Styles, including automatic dark mode and the print/PDF résumé layout |
-| `assets/js/main.js` | Small enhancements: auto-updating "years of experience", "show more" toggles, active nav link |
+| `assets/js/main.js` | Small enhancements: auto-updating "years of experience", career highlight toggles, active nav link, live GitHub commits |
 | `assets/img/shayan-zafar-ahmad.jpg` | Portrait used in the hero (600×600, face-centred crop, metadata stripped) |
+| `assets/img/projects/` | ThirteenF screenshots (light and dark), cropped from the ThirteenF repo's `design/screens/png/` |
 | `assets/img/og-image.png` | Link-preview image shown when the URL is shared on LinkedIn, Slack, etc. (1200×627) |
 | `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, generated from the page's print layout |
 | `favicon.svg`, `apple-touch-icon.png` | Browser tab and home-screen icons |
@@ -26,6 +30,16 @@ All content lives in `index.html`. The "14 years" / "7 years" figures update the
 `data-years-since="YYYY-MM"`, so they don't need manual edits.
 
 After changing experience or skills, regenerate the résumé PDF (below) so the download matches the page.
+
+**Now section:** update the two lines and the "Updated" month in the About section when your focus changes.
+
+**Live GitHub activity:** the Projects section lists ThirteenF's latest commits. `main.js` fetches them from the public
+GitHub API in each visitor's browser (`data-gh-commits="owner/repo"`), skipping merge commits. The commits written
+into `index.html` are a fallback snapshot, shown if the API is slow, blocked or rate-limited, so refresh them
+occasionally. To feature another repo, copy the project card and change the `data-gh-*` attributes.
+
+**Caching:** GitHub Pages lets browsers cache files for 10 minutes. When you change `styles.css` or `main.js`,
+bump the `?v=` date on their links in `index.html` so returning visitors don't get new HTML with old CSS.
 
 ## Preview locally
 
