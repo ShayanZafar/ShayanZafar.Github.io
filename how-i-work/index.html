@@ -29,10 +29,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Newsreader:opsz,wght@6..72,400..600&display=swap">
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2026-10-03c">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2026-10-04">
 
   <script>document.documentElement.classList.add('js')</script>
-  <script src="/assets/js/main.js?v=2026-10-03c" defer></script>
+  <script src="/assets/js/main.js?v=2026-10-04" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -101,8 +101,8 @@
         <div class="trait">
           <h3 class="trait__title">I build in phases, and each phase has a check</h3>
           <p>
-            I don’t trust big-bang delivery. I break work into phases small enough to finish, decide up front what
-            proves each one works, and only start the next when that check passes. Finished phases ship.
+            I avoid big-bang releases. I break work into phases small enough to finish, define up front what proves
+            each one works, and start the next only when that check passes. Each finished phase ships.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
             ThirteenF went from a prototype to eight working phases, each gated by its own check and pushed as it
@@ -115,25 +115,24 @@
           <h3 class="trait__title">Every number should be traceable</h3>
           <p>
             If a system shows a number, I want to know where it came from and be able to rebuild it from source. When
-            data fails a sanity check, I’d rather show the check than a confident wrong answer.
+            data fails a sanity check, I surface the issue rather than show a number that might be wrong.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
             ThirteenF never edits the raw SEC files; every figure is derived from them and carries its as-of date and
-            source, and share totals that fail an implied-price check are flagged instead of shown. Messy cases such as
+            source, and share totals that fail an implied-price check are flagged instead of shown. Edge cases such as
             CUSIP changes, managers switching identifiers and incomplete filings are handled explicitly and covered by
             tests, including checks against published reference numbers.
           </p>
         </div>
 
         <div class="trait">
-          <h3 class="trait__title">I choose boring, inspectable technology</h3>
+          <h3 class="trait__title">I choose simple, proven technology</h3>
           <p>
-            Given two ways to build something, I pick the one the next engineer can read in an afternoon.
+            Given two ways to build something, I choose the one the next engineer can understand and maintain.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
-            ThirteenF runs on Python, DuckDB and FastAPI with server-rendered pages and server-drawn SVG charts, and no
-            front-end framework. Its local settings live in one git-ignored file instead of scattered environment
-            variables. This site is plain HTML and CSS with no build step.
+            ThirteenF runs on Python, DuckDB and FastAPI, with server-rendered pages and server-drawn SVG charts instead of
+            a front-end framework. This site is plain HTML and CSS with no build step.
           </p>
         </div>
 
@@ -153,7 +152,7 @@
         <div class="trait">
           <h3 class="trait__title">I start from the user’s question</h3>
           <p>
-            The best spec I know is a real person’s question, answered end to end.
+            Strong requirements start from a real user’s question, answered end to end.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
             At DraftKings we wrote a C# client against our own real-time odds API to test the partner documentation from
@@ -170,7 +169,7 @@
           <p class="trait__proof"><span class="principle__label">In practice</span>
             At Ontario Health my teams kept an emergency triage system highly available on Azure, using deployment slots
             and Application Insights. At MitraTech I prioritized security debt from Snyk reports and pen-test findings and
-            added Datadog monitoring. In my own projects, keys never go into the repository.
+            added Datadog monitoring.
           </p>
         </div>
       </section>
@@ -181,13 +180,13 @@
         <h2 class="article__h2" id="manager-title">As a manager</h2>
         <p class="article__intro">
           I’ve led engineers and team leads since 2019, in healthcare, sports betting, retail and HR software. I see my
-          job as making good delivery the default, and helping people grow while it happens.
+          job as making good delivery the default, and helping people grow along the way.
         </p>
 
         <div class="trait">
           <h3 class="trait__title">I make the delivery system predictable</h3>
           <p>
-            Teams do their best work when the way work flows is boring: a written technical plan, one release rhythm,
+            Teams do their best work with a clear plan and a steady rhythm: a written technical plan, one release cycle,
             and delivery metrics everyone can see.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
@@ -222,7 +221,7 @@
         <div class="trait">
           <h3 class="trait__title">Growth is part of the job</h3>
           <p>
-            Part of how I measure myself is who moves up.
+            I measure part of my success by the growth of the people on my team.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
             At DraftKings I owned hiring, performance, one-on-ones and career growth for my team, and promoted an
@@ -233,7 +232,7 @@
         <div class="trait">
           <h3 class="trait__title">I translate engineering into business terms</h3>
           <p>
-            Executives need plans, costs and trade-offs they can act on, not a tour of the architecture.
+            Executives need clear plans, costs and trade-offs they can act on.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
             Roadmaps, capacity planning and initiative costing with executives at DraftKings and Staples Canada; vendor and
@@ -244,7 +243,7 @@
         <div class="trait">
           <h3 class="trait__title">In a crisis, narrow the focus</h3>
           <p>
-            When the stakes jump, I shrink the work to what matters most and keep the system up.
+            When the stakes rise, I focus the team on what matters most and keep critical systems running.
           </p>
           <p class="trait__proof"><span class="principle__label">In practice</span>
             During COVID-19 at Ontario Health, my teams built an API to track infection data and adapted the emergency
@@ -274,10 +273,8 @@
         <div class="trait">
           <h3 class="trait__title">In my own work</h3>
           <p>
-            I build my side projects by directing AI coding agents the way I’d direct a team: a written build plan with a
-            check for every phase, a design system, and project rules the agents follow. I often run several of these
-            sessions in parallel. It’s management in miniature: clear specs, small batches, and verification before
-            anything ships.
+            I use AI coding tools on my own projects with the same discipline I expect from a team: a written build plan
+            with a check for every phase, a design system, clear project rules, and tests before anything ships.
           </p>
         </div>
       </section>

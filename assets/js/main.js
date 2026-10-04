@@ -104,7 +104,7 @@
 
       // Only claim "in active development" while there have been commits in the last 90 days.
       const kind = document.querySelector(`[data-gh-kind="${repo}"]`);
-      if (kind && now - latest > 90 * 86400000) kind.textContent = 'Side project';
+      if (kind && now - latest > 90 * 86400000) kind.textContent = 'Personal project';
 
       list.closest('.project')?.querySelector('[data-gh-live]')?.removeAttribute('hidden');
     } catch {
@@ -135,9 +135,10 @@
     name.rel = 'noopener';
     name.textContent = repo.name;
 
+    // Repos without a description show just their name and details.
     const description = document.createElement('p');
     description.className = 'repo__desc';
-    description.textContent = repo.description || 'No description yet.';
+    description.textContent = repo.description || '';
 
     const meta = document.createElement('p');
     meta.className = 'repo__meta';
@@ -159,7 +160,7 @@
       meta.append(stars);
     }
 
-    card.append(name, description, meta);
+    card.append(name, ...(repo.description ? [description] : []), meta);
 
     const homepage = httpUrl(repo.homepage);
     if (homepage) {
