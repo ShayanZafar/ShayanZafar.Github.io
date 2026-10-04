@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How I work — Shayan Zafar Ahmad</title>
+  <meta name="description" content="How Shayan Zafar Ahmad builds software and leads engineering teams: phased delivery with checks, traceable data, simple technology, predictable delivery, deliberate distributed-team rhythms, and AI with guardrails.">
+  <meta name="author" content="Shayan Zafar Ahmad">
+  <link rel="canonical" href="https://shayanzafar.github.io/how-i-work/">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbf9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0c0e12">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Shayan Zafar Ahmad">
+  <meta property="og:locale" content="en_CA">
+  <meta property="og:url" content="https://shayanzafar.github.io/how-i-work/">
+  <meta property="og:title" content="How I work — Shayan Zafar Ahmad">
+  <meta property="og:description" content="My engineering and management style, with the evidence behind each point.">
+  <meta property="og:image" content="https://shayanzafar.github.io/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="627">
+  <meta property="og:image:alt" content="Shayan Zafar Ahmad, Senior Software Engineering Manager">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Newsreader:opsz,wght@6..72,400..600&display=swap">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2026-10-03c">
+
+  <script>document.documentElement.classList.add('js')</script>
+  <script src="/assets/js/main.js?v=2026-10-03c" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+  </svg>
+
+  <header class="site-header" id="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/" aria-label="Shayan Zafar Ahmad — home">
+        <span class="brand__mark" aria-hidden="true">SZ</span>
+        <span class="brand__name">Shayan Zafar Ahmad</span>
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <ul>
+          <li><a href="/#about">About</a></li>
+          <li><a href="/#how-i-lead">How I lead</a></li>
+          <li><a href="/#career">Career</a></li>
+          <li><a href="/#projects">Projects</a></li>
+        </ul>
+      </nav>
+      <a class="btn btn--primary btn--sm" href="/#contact">Get in touch</a>
+    </div>
+  </header>
+
+  <main id="main" class="article">
+    <div class="container article__container">
+      <header class="article__header">
+        <a class="article__back" href="/"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-left"/></svg>shayanzafar.github.io</a>
+        <p class="pill">Engineering and management style</p>
+        <h1 class="article__title">How I work</h1>
+        <p class="article__lead">
+          LinkedIn lists where I’ve worked. This page is about how: the way I build software and the way I lead the
+          people who build it. Each point comes with an example of where it has actually shown up.
+        </p>
+        <p class="article__byline">Shayan Zafar Ahmad · Updated <time datetime="2026-10">October 2026</time></p>
+
+        <div class="article__thread">
+          <p class="mini-heading">The short version</p>
+          <p>Small, checkable steps. Numbers and decisions you can trace. Technology simple enough for the next person
+            to own. Delivery rhythms that make good outcomes the default, and people who grow into bigger roles.</p>
+        </div>
+
+        <nav class="article__toc" aria-label="On this page">
+          <ol>
+            <li><a href="#engineer">As an engineer</a></li>
+            <li><a href="#manager">As a manager</a></li>
+            <li><a href="#ai">Where AI fits</a></li>
+          </ol>
+        </nav>
+      </header>
+
+      <!-- As an engineer -->
+      <section class="article__part" id="engineer" aria-labelledby="engineer-title">
+        <p class="section__num">Part 1</p>
+        <h2 class="article__h2" id="engineer-title">As an engineer</h2>
+        <p class="article__intro">
+          I’ve written production software for <span data-years-since="2012-04">14</span> years, mostly C#,
+          <span class="nowrap">T-SQL</span> and TypeScript on Azure, and I still build: at work in design reviews and
+          code, and on my own projects in Python. A few habits run through all of it.
+        </p>
+
+        <div class="trait">
+          <h3 class="trait__title">I build in phases, and each phase has a check</h3>
+          <p>
+            I don’t trust big-bang delivery. I break work into phases small enough to finish, decide up front what
+            proves each one works, and only start the next when that check passes. Finished phases ship.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            ThirteenF went from a prototype to eight working phases, each gated by its own check and pushed as it
+            passed. At MitraTech I rebuilt the SDLC around the same idea: technical planning first, so risk surfaces
+            before code is written.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">Every number should be traceable</h3>
+          <p>
+            If a system shows a number, I want to know where it came from and be able to rebuild it from source. When
+            data fails a sanity check, I’d rather show the check than a confident wrong answer.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            ThirteenF never edits the raw SEC files; every figure is derived from them and carries its as-of date and
+            source, and share totals that fail an implied-price check are flagged instead of shown. Messy cases such as
+            CUSIP changes, managers switching identifiers and incomplete filings are handled explicitly and covered by
+            tests, including checks against published reference numbers.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">I choose boring, inspectable technology</h3>
+          <p>
+            Given two ways to build something, I pick the one the next engineer can read in an afternoon.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            ThirteenF runs on Python, DuckDB and FastAPI with server-rendered pages and server-drawn SVG charts, and no
+            front-end framework. Its local settings live in one git-ignored file instead of scattered environment
+            variables. This site is plain HTML and CSS with no build step.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">Consistency is designed in, not retrofitted</h3>
+          <p>
+            Shared foundations, from design tokens to a branching strategy to a release calendar, are cheaper to agree
+            on early than to enforce later.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            ThirteenF had a design system (colour tokens, components and writing rules) and finished screen designs
+            before the first page was built. At MitraTech I replaced a conflicting multi-team release schedule with one
+            monthly cycle and a cleaner git branching strategy.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">I start from the user’s question</h3>
+          <p>
+            The best spec I know is a real person’s question, answered end to end.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            At DraftKings we wrote a C# client against our own real-time odds API to test the partner documentation from
+            the partner’s side. ThirteenF’s money-flow pages started as one question: where is the money moving for this
+            stock?
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">Security and reliability are part of the feature</h3>
+          <p>
+            Uptime, observability and security debt belong on the same backlog as features, not after them.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            At Ontario Health my teams kept an emergency triage system highly available on Azure, using deployment slots
+            and Application Insights. At MitraTech I prioritized security debt from Snyk reports and pen-test findings and
+            added Datadog monitoring. In my own projects, keys never go into the repository.
+          </p>
+        </div>
+      </section>
+
+      <!-- As a manager -->
+      <section class="article__part" id="manager" aria-labelledby="manager-title">
+        <p class="section__num">Part 2</p>
+        <h2 class="article__h2" id="manager-title">As a manager</h2>
+        <p class="article__intro">
+          I’ve led engineers and team leads since 2019, in healthcare, sports betting, retail and HR software. I see my
+          job as making good delivery the default, and helping people grow while it happens.
+        </p>
+
+        <div class="trait">
+          <h3 class="trait__title">I make the delivery system predictable</h3>
+          <p>
+            Teams do their best work when the way work flows is boring: a written technical plan, one release rhythm,
+            and delivery metrics everyone can see.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            At MitraTech: technical planning before code, best-practice CI/CD and a monthly release cycle. At DraftKings
+            I owned the roadmap, backlog and timelines, and tracked delivery health through velocity, burndown and churn.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">Distributed teams need deliberate rhythms</h3>
+          <p>
+            Across time zones, alignment doesn’t happen by accident; it has to be designed into the week.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            My twelve engineers span India, US East and West, and Mexico. A recurring cross-time-zone technical sync cut
+            delivery uncertainty and raised code quality.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">Interviews should look like the job</h3>
+          <p>
+            I hire for how people actually work: how they read code, solve a problem and reason about a design.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            I built a hiring process around code review, a coding exercise and a technical design discussion, plus an
+            onboarding framework for new developers. I’ve hired team leads, senior developers and QA for new teams at
+            Staples Canada, and senior developers at Ontario Health.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">Growth is part of the job</h3>
+          <p>
+            Part of how I measure myself is who moves up.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            At DraftKings I owned hiring, performance, one-on-ones and career growth for my team, and promoted an
+            intermediate developer to senior and a lead developer to manager.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">I translate engineering into business terms</h3>
+          <p>
+            Executives need plans, costs and trade-offs they can act on, not a tour of the architecture.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            Roadmaps, capacity planning and initiative costing with executives at DraftKings and Staples Canada; vendor and
+            licence audits that cut tooling spend at MitraTech.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">In a crisis, narrow the focus</h3>
+          <p>
+            When the stakes jump, I shrink the work to what matters most and keep the system up.
+          </p>
+          <p class="trait__proof"><span class="principle__label">In practice</span>
+            During COVID-19 at Ontario Health, my teams built an API to track infection data and adapted the emergency
+            triage application to pandemic demand, while keeping a highly available system running for Ontario hospitals.
+          </p>
+        </div>
+      </section>
+
+      <!-- Where AI fits -->
+      <section class="article__part" id="ai" aria-labelledby="ai-title">
+        <p class="section__num">Part 3</p>
+        <h2 class="article__h2" id="ai-title">Where AI fits</h2>
+        <p class="article__intro">
+          I treat AI like any new capability on a team: prove it on real work, put guardrails around it, measure it, then
+          scale it.
+        </p>
+
+        <div class="trait">
+          <h3 class="trait__title">At work</h3>
+          <p>
+            At MitraTech I led engineering-wide adoption: procuring licences, setting guardrails and best practices,
+            integrating Devin for code scanning and metrics, and running proofs of concept with GitHub Copilot and Devin on
+            real tech debt and features before rolling them out.
+          </p>
+        </div>
+
+        <div class="trait">
+          <h3 class="trait__title">In my own work</h3>
+          <p>
+            I build my side projects by directing AI coding agents the way I’d direct a team: a written build plan with a
+            check for every phase, a design system, and project rules the agents follow. I often run several of these
+            sessions in parallel. It’s management in miniature: clear specs, small batches, and verification before
+            anything ships.
+          </p>
+        </div>
+      </section>
+
+      <aside class="article__evidence" aria-labelledby="evidence-title">
+        <h2 class="mini-heading" id="evidence-title">See the evidence</h2>
+        <ul>
+          <li><a href="https://github.com/ShayanZafar/ThirteenF" target="_blank" rel="noopener">ThirteenF on GitHub<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a> its build plan, design system and tests</li>
+          <li><a href="/#career">Career</a> the roles behind the examples</li>
+          <li><a href="/assets/Shayan_Zafar_Ahmad_Resume.pdf" download>Résumé (PDF)</a> the full detail</li>
+          <li><a href="https://github.com/ShayanZafar/ShayanZafar.Github.io" target="_blank" rel="noopener">This site’s source<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-up-right"/></svg></a> plain HTML and CSS</li>
+        </ul>
+        <a class="btn btn--primary" href="mailto:shayan.zafar.ahmad@gmail.com">
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-mail"/></svg>
+          Email me
+        </a>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>© <span data-current-year>2026</span> Shayan Zafar Ahmad · Richmond Hill, Ontario</p>
+      <p>Hand-built with HTML &amp; CSS · <a href="https://github.com/ShayanZafar/ShayanZafar.Github.io" target="_blank" rel="noopener">View source</a></p>
+    </div>
+  </footer>
+</body>
+</html>

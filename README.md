@@ -14,6 +14,7 @@ career summary. The full résumé lives in the downloadable PDF.
 | Path | Purpose |
 | --- | --- |
 | `index.html` | All page content: about and *Now*, how I lead, career, projects, contact. Skills and education are print-only (they appear in the PDF) |
+| `how-i-work/index.html` | "How I work": long-form engineering and management style, each point backed by an example (served at `/how-i-work/`) |
 | `assets/css/styles.css` | Styles, including automatic dark mode and the print/PDF résumé layout |
 | `assets/js/main.js` | Small enhancements: auto-updating "years of experience", career highlight toggles, active nav link, live GitHub commits and repo list |
 | `assets/img/shayan-zafar-ahmad.jpg` | Portrait used in the hero (600×600, face-centred crop, metadata stripped) |
