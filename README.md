@@ -32,7 +32,7 @@ All content lives in `index.html`. The "14 years" / "7 years" figures update the
 
 After changing experience or skills, regenerate the résumé PDF (below) so the download matches the page.
 
-**Booking link:** the Calendly URL appears in three places: the hero, the contact panel, and the How I work page.
+**Booking link:** "Request an intro call" points to the Cal.com event `cal.com/shayan-zafar-ahmad/intro-call` (Google Meet, every booking needs your approval) in three places: the hero, the contact panel, and the How I work page.
 
 **Now section:** update the two lines and the "Updated" month in the About section when your focus changes.
 
