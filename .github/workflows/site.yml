@@ -1,0 +1,116 @@
+# Checks every change, rebuilds the résumé PDF from the page's print layout, and deploys to GitHub Pages
+# only when the checks pass. A weekly run re-checks external links, which can break without any change here.
+#
+# One-time setup: Settings → Pages → Build and deployment → Source → "GitHub Actions".
+# Until then, the checks still run and the deploy step is skipped with a notice.
+
+name: Site
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 13 * * 1" # Mondays, 9:00 Toronto time (EDT)
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check pages, copy and privacy rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: node scripts/check-site.mjs
+
+  links:
+    name: Check external links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: node scripts/check-site.mjs --external-only
+
+  build:
+    name: Build site and résumé PDF
+    needs: check
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      pages-source: ${{ steps.source.outputs.build_type }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install PDF tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+
+      - name: Render résumé PDF from the print layout
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/dev/null 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
+            --run-all-compositor-stages-before-draw --virtual-time-budget=10000 \
+            --print-to-pdf=assets/Shayan_Zafar_Ahmad_Resume.pdf http://127.0.0.1:4173/
+
+      - name: Verify résumé PDF
+        run: |
+          pdf=assets/Shayan_Zafar_Ahmad_Resume.pdf
+          pdftotext -layout "$pdf" "$RUNNER_TEMP/resume.txt"
+          pages=$(pdfinfo "$pdf" | awk '/^Pages:/ {print $2}')
+          echo "Résumé PDF: $pages pages"
+          # The text layer must keep names, dates and hyphens intact for applicant-tracking systems.
+          for text in "Shayan Zafar Ahmad" "SUMMARY" "EXPERIENCE" "EDUCATION" "Sep 2024" "T-SQL"; do
+            if ! grep -q -- "$text" "$RUNNER_TEMP/resume.txt"; then
+              echo "::error file=$pdf::The PDF text is missing \"$text\""
+              exit 1
+            fi
+          done
+          if grep -Eq '\(?[0-9]{3}\)?[ .-][0-9]{3}[ .-][0-9]{4}' "$RUNNER_TEMP/resume.txt"; then
+            echo "::error file=$pdf::The PDF contains what looks like a phone number"
+            exit 1
+          fi
+          if [ "$pages" -gt 2 ]; then
+            echo "::warning file=$pdf::The résumé PDF is $pages pages (expected 2)"
+          fi
+
+      - name: Assemble site
+        run: |
+          mkdir -p "$RUNNER_TEMP/site"
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'scripts' --exclude '.gitignore' ./ "$RUNNER_TEMP/site/"
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ runner.temp }}/site
+
+      - name: Check how GitHub Pages is set up
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          type=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type 2>/dev/null || echo unknown)
+          echo "build_type=$type" >> "$GITHUB_OUTPUT"
+          if [ "$type" != "workflow" ]; then
+            echo "::notice::GitHub Pages deploys from a branch ($type), so this workflow skips deploying. Switch Settings → Pages → Source to \"GitHub Actions\" to deploy only after checks pass."
+          fi
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: needs.build.outputs.pages-source == 'workflow'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

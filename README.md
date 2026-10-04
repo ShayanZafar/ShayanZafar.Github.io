@@ -20,7 +20,9 @@ career summary. The full résumé lives in the downloadable PDF.
 | `assets/img/shayan-zafar-ahmad.jpg` | Portrait used in the hero (600×600, face-centred crop, metadata stripped) |
 | `assets/img/projects/` | ThirteenF screenshots (light and dark), cropped from the ThirteenF repo's `design/screens/png/` |
 | `assets/img/og-image.png` | Link-preview image shown when the URL is shared on LinkedIn, Slack, etc. (1200×627) |
-| `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, generated from the page's print layout |
+| `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, rebuilt from the page's print layout on every deploy |
+| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules), run locally and on every push |
+| `.github/workflows/site.yml` | Checks every change, rebuilds the résumé PDF, and deploys only when the checks pass |
 | `favicon.svg`, `apple-touch-icon.png` | Browser tab and home-screen icons |
 | `404.html` | Custom "page not found" page |
 | `.nojekyll` | Tells GitHub Pages to serve files as-is (skip Jekyll) |
@@ -30,7 +32,7 @@ career summary. The full résumé lives in the downloadable PDF.
 All content lives in `index.html`. The "14 years" / "7 years" figures update themselves each year via
 `data-years-since="YYYY-MM"`, so they don't need manual edits.
 
-After changing experience or skills, regenerate the résumé PDF (below) so the download matches the page.
+The résumé PDF rebuilds itself on every deploy, so the download always matches the page.
 
 **Booking link:** "Request an intro call" points to the Cal.com event `cal.com/shayan-zafar-ahmad/intro-call` (Google Meet, every booking needs your approval) in three places: the hero, the contact panel, and the How I work page.
 
@@ -51,7 +53,7 @@ new repo shows up on the next page load after you push to it. The rules:
   **About ⚙** on the repo's GitHub page.
 - A repo's description, language, stars and homepage ("Live site") come straight from GitHub, so fill those in.
 
-The section stays hidden while no repo qualifies. ThirteenF's "In active development" label switches to "Side
+The section stays hidden while no repo qualifies. ThirteenF's "In active development" label switches to "Personal
 project" automatically after 90 days without commits.
 
 **Caching:** GitHub Pages lets browsers cache files for 10 minutes. When you change `styles.css` or `main.js`,
@@ -65,20 +67,36 @@ py -3 -m http.server 4173
 
 Then open http://localhost:4173.
 
-## Regenerate the résumé PDF
+## Checks and deployment
 
-The PDF is the page's print layout. With the local preview running, either print the page from Chrome
-(**Save as PDF**, Letter, margins *Default*, headers and footers off) to `assets/Shayan_Zafar_Ahmad_Resume.pdf`,
-or run headless Chrome:
+Every push to `master` runs the **Site** workflow (`.github/workflows/site.yml`):
+
+1. **Checks** (`scripts/check-site.mjs`): every local link, image and anchor resolves; one `<h1>` per page; no
+   duplicate ids; images have alt text; new-tab links are safe; `?v=` asset versions match across pages; and the
+   site's own rules: no phone number or postal code, and no casual or placeholder wording.
+2. **Résumé PDF:** rebuilt from the page's print layout with headless Chrome, then verified: the name, section
+   headings, dates and "T-SQL" must survive in the text layer, there must be no phone number, and it warns if the
+   PDF runs past 2 pages.
+3. **Deploy:** publishes to GitHub Pages only if the checks pass.
+
+External links are checked on every push and every Monday. A broken one fails the run, and GitHub emails you, but it
+doesn't block the deploy.
+
+Run the checks before pushing (add `--external` to include external links):
+
+```bash
+node scripts/check-site.mjs
+```
+
+**One-time setup:** Settings → Pages → Build and deployment → Source → **GitHub Actions**. Until then, the site deploys
+straight from `master` and the workflow skips its deploy step.
+
+The PDF committed in the repo is only used for local preview. To refresh it locally, print the page from Chrome
+(**Save as PDF**, Letter, margins *Default*, headers and footers off) or run:
 
 ```bash
 "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" --headless=new --no-pdf-header-footer --print-to-pdf=assets/Shayan_Zafar_Ahmad_Resume.pdf http://localhost:4173/
 ```
-
-## Deploying
-
-GitHub Pages publishes the `master` branch automatically: push and the site updates in about a minute.
-(One-time setup: **Settings → Pages → Build and deployment → Deploy from a branch → `master` / `(root)`**.)
 
 ## Sharing on LinkedIn
 
