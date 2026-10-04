@@ -32,6 +32,8 @@ All content lives in `index.html`. The "14 years" / "7 years" figures update the
 
 After changing experience or skills, regenerate the résumé PDF (below) so the download matches the page.
 
+**Booking link:** the Calendly URL appears in three places: the hero, the contact panel, and the How I work page.
+
 **Now section:** update the two lines and the "Updated" month in the About section when your focus changes.
 
 **Live GitHub activity:** the Projects section lists ThirteenF's latest commits. `main.js` fetches them from the public
