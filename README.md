@@ -88,8 +88,9 @@ Run the checks before pushing (add `--external` to include external links):
 node scripts/check-site.mjs
 ```
 
-**One-time setup:** Settings → Pages → Build and deployment → Source → **GitHub Actions**. Until then, the site deploys
-straight from `master` and the workflow skips its deploy step.
+**Setup:** GitHub Pages is set to deploy from **GitHub Actions** (Settings → Pages → Build and deployment → Source), so
+this workflow is the only way the site is published. If that setting ever reverts to a branch, the workflow skips
+deploying and leaves a notice on the run.
 
 The PDF committed in the repo is only used for local preview. To refresh it locally, print the page from Chrome
 (**Save as PDF**, Letter, margins *Default*, headers and footers off) or run:
