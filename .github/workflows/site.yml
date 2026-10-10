@@ -81,7 +81,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p "$RUNNER_TEMP/site"
-          rsync -a --exclude '.git' --exclude '.github' --exclude 'scripts' --exclude '.gitignore' ./ "$RUNNER_TEMP/site/"
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'scripts' --exclude '.gitignore' --exclude 'CLAUDE.md' ./ "$RUNNER_TEMP/site/"
 
       - uses: actions/upload-pages-artifact@v5
         with:

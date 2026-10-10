@@ -21,6 +21,7 @@ career summary. The full résumé lives in the downloadable PDF.
 | `assets/img/projects/` | ThirteenF screenshots (light and dark), cropped from the ThirteenF repo's `design/screens/png/` |
 | `assets/img/og-image.png` | Link-preview image shown when the URL is shared on LinkedIn, Slack, etc. (1200×627) |
 | `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, rebuilt from the page's print layout on every deploy |
+| `CLAUDE.md` | Rules and the definition of done for Claude Code sessions working on the site (not deployed) |
 | `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules), run locally and on every push |
 | `.github/workflows/site.yml` | Checks every change, rebuilds the résumé PDF, and deploys only when the checks pass |
 | `favicon.svg`, `apple-touch-icon.png` | Browser tab and home-screen icons |
