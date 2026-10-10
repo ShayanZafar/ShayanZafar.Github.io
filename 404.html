@@ -10,13 +10,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Newsreader:opsz,wght@6..72,400..600&display=swap">
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2026-10-04c">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=2026-10-10a">
   <style>
-    .not-found { display: grid; place-content: center; min-height: 100vh; min-height: 100dvh; padding: 2rem var(--gutter); text-align: center; }
+    body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+    .not-found { display: grid; flex: 1; place-content: center; padding: 2rem var(--gutter); text-align: center; }
     .not-found .hero__name { margin-top: 1rem; font-size: clamp(2.5rem, 1.5rem + 4vw, 4rem); }
     .not-found p { margin-top: 1rem; color: var(--text-muted); }
     .not-found .btn { margin-top: 2rem; justify-self: center; }
+    .site-footer__inner { justify-content: center; text-align: center; }
   </style>
+
+  <!-- Visit statistics: counts the missing address as "404: /path", so broken inbound links show up in GoatCounter. -->
+  <script>window.goatcounter = { path: function () { return '404: ' + location.pathname; } };</script>
+  <script data-goatcounter="https://shayanzafar.goatcounter.com/count" src="https://gc.zgo.at/count.js" defer></script>
 </head>
 <body>
   <main class="not-found">
@@ -25,5 +31,11 @@
     <p>The page you’re looking for doesn’t exist or has moved.</p>
     <a class="btn btn--primary" href="/">Go to shayanzafar.github.io</a>
   </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p class="site-footer__note">Anonymous, cookie-free visit statistics by <a href="https://www.goatcounter.com/help/privacy" target="_blank" rel="noopener">GoatCounter</a></p>
+    </div>
+  </footer>
 </body>
 </html>

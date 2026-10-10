@@ -24,7 +24,8 @@ career summary. The full résumé lives in the downloadable PDF.
 | `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules), run locally and on every push |
 | `.github/workflows/site.yml` | Checks every change, rebuilds the résumé PDF, and deploys only when the checks pass |
 | `favicon.svg`, `apple-touch-icon.png` | Browser tab and home-screen icons |
-| `404.html` | Custom "page not found" page |
+| `404.html` | Custom "page not found" page; counts the missing address so broken inbound links show up in the statistics |
+| `admin/index.html` | Unlisted "Site statistics" page for you: a link to the GoatCounter dashboard and the switch that stops counting your own visits (not linked from the site, `noindex`, never counted) |
 | `.nojekyll` | Tells GitHub Pages to serve files as-is (skip Jekyll) |
 
 ## Editing
@@ -57,7 +58,28 @@ The section stays hidden while no repo qualifies. ThirteenF's "In active develop
 project" automatically after 90 days without commits.
 
 **Caching:** GitHub Pages lets browsers cache files for 10 minutes. When you change `styles.css` or `main.js`,
-bump the `?v=` date on their links in `index.html` so returning visitors don't get new HTML with old CSS.
+bump the `?v=` date on their links in every page so returning visitors don't get new HTML with old CSS. The checks
+fail if the versions differ between pages.
+
+## Visit statistics
+
+Visits are counted with [GoatCounter](https://www.goatcounter.com/): anonymous and cookie-free, with a one-line notice
+in each page's footer. The dashboard is at **https://shayanzafar.goatcounter.com** (sign-in required), and the unlisted
+page **https://shayanzafar.github.io/admin/** links to it.
+
+- **Page views:** the home page, How I work and the 404 page. A missing page is recorded as `404: /the-path`; open it
+  in the dashboard to see which site linked to it.
+- **Clicks**, listed in the dashboard as events: `request-intro-call` (hero, contact panel, How I work), `email`,
+  `linkedin`, `github`, `resume-pdf` and `thirteenf-repo`. Each link carries `data-goatcounter-click` (the event name)
+  and `data-goatcounter-title`. To count a new link, add both, reusing an existing name and title where it fits.
+- **Tagged links:** add `?ref=name` to any page address, e.g. `https://shayanzafar.github.io/?ref=acme`. Visits through
+  it are listed under Referrers as "acme". Add `&campaign=name` as well to group links in the Campaigns panel. No
+  dashboard setting is needed.
+- **Your own visits:** open `/admin/` and use "Stop counting this browser" once per browser and device (GoatCounter's
+  `#toggle-goatcounter` switch; using it again turns counting back on). On a fixed IP address you can instead add it
+  under Settings → Tracking → Ignore IPs in the dashboard.
+- **Never counted:** local previews and the résumé PDF build, because GoatCounter ignores `localhost` and `127.0.0.1`.
+  The checks fail if `allow_local` is ever turned on.
 
 ## Preview locally
 
@@ -73,7 +95,9 @@ Every push to `master` runs the **Site** workflow (`.github/workflows/site.yml`)
 
 1. **Checks** (`scripts/check-site.mjs`): every local link, image and anchor resolves; one `<h1>` per page; no
    duplicate ids; images have alt text; new-tab links are safe; `?v=` asset versions match across pages; and the
-   site's own rules: no phone number or postal code, and no casual or placeholder wording.
+   site's own rules: no phone number or postal code, and no casual or placeholder wording. Visit statistics: every
+   public page loads GoatCounter once and shows the footer notice, click events are named consistently, and
+   `/admin/` stays unlisted (no GoatCounter, `noindex`, and no page links to it).
 2. **Résumé PDF:** rebuilt from the page's print layout with headless Chrome, then verified: the name, section
    headings, dates and "T-SQL" must survive in the text layer, there must be no phone number, and it warns if the
    PDF runs past 2 pages.

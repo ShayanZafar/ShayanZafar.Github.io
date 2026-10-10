@@ -18,10 +18,20 @@ const CHECK_EXTERNAL = argv.includes('--external') || argv.includes('--external-
 const CHECK_INTERNAL = !argv.includes('--external-only');
 
 const SITE_ORIGIN = 'https://shayanzafar.github.io/';
-const PAGES = ['index.html', 'how-i-work/index.html', '404.html'];
+const PAGES = ['index.html', 'how-i-work/index.html', '404.html', 'admin/index.html'];
 const PAGES_NEEDING_DESCRIPTION = ['index.html', 'how-i-work/index.html'];
 const RESUME_PDF = 'assets/Shayan_Zafar_Ahmad_Resume.pdf';
 const OG_IMAGE = { path: 'assets/img/og-image.png', width: 1200, height: 627 };
+
+// Visit statistics: GoatCounter runs on every public page. The owner's page is unlisted and never counted.
+const ANALYTICS = {
+  endpoint: 'https://shayanzafar.goatcounter.com/count',
+  script: 'https://gc.zgo.at/count.js',
+  privacyPolicy: 'https://www.goatcounter.com/help/privacy',
+};
+const UNLISTED_PAGES = ['admin/index.html'];
+// Link fragments that count.js handles itself (its opt-out switch), so they don't need a matching id.
+const SCRIPT_FRAGMENTS = ['toggle-goatcounter'];
 
 // Editorial rules for profile text: keep it professional, with no placeholders.
 const BANNED_PHRASES = ['boring', 'heroics', 'day job', 'on the side', 'tour of the architecture',
@@ -83,6 +93,7 @@ const resolveLocal = (page, href) => {
 
 function checkPages() {
   const versions = new Set();
+  const eventTitles = new Map(); // click-event name -> title, across pages
 
   for (const page of PAGES) {
     if (!exists(page)) { error(page, 'page is missing'); continue; }
@@ -117,8 +128,40 @@ function checkPages() {
       const target = resolveLocal(page, ref);
       if (!target) continue;
       if (!exists(target.file)) { error(page, `broken link: ${ref} (no file ${target.file})`); continue; }
-      if (target.fragment && target.file.endsWith('.html') && !idsIn(html(target.file)).includes(target.fragment)) {
+      if (UNLISTED_PAGES.includes(target.file) && target.file !== page) error(page, `links to the unlisted page ${target.file}`);
+      if (target.fragment && !SCRIPT_FRAGMENTS.includes(target.fragment) && target.file.endsWith('.html')
+        && !idsIn(html(target.file)).includes(target.fragment)) {
         error(page, `broken anchor: ${ref} (no id "${target.fragment}" in ${target.file})`);
+      }
+    }
+
+    // Visit statistics: one GoatCounter script and a notice on public pages; none on unlisted pages. allow_local
+    // would count local previews and the résumé PDF build, which renders the page from 127.0.0.1.
+    const counters = tags(s, 'script').filter((t) => /\sdata-goatcounter=/.test(t));
+    if (UNLISTED_PAGES.includes(page)) {
+      if (counters.length) error(page, 'unlisted pages must not load the GoatCounter script');
+      if (!/<meta name="robots" content="noindex/.test(s)) error(page, 'unlisted pages need <meta name="robots" content="noindex">');
+    } else {
+      if (counters.length !== 1) error(page, `expected the GoatCounter script once, found ${counters.length}`);
+      for (const t of counters) {
+        if (!t.includes(`data-goatcounter="${ANALYTICS.endpoint}"`) || !t.includes(`src="${ANALYTICS.script}"`)) {
+          error(page, `the GoatCounter script must send to ${ANALYTICS.endpoint} and load ${ANALYTICS.script}`);
+        }
+      }
+      if (!attrs(s, 'href').includes(ANALYTICS.privacyPolicy)) error(page, `missing the visit statistics notice (link to ${ANALYTICS.privacyPolicy})`);
+    }
+    if (/allow_local/.test(stripComments(s))) error(page, 'GoatCounter must not use allow_local');
+
+    // Click events: names GoatCounter accepts, and one title per name (the dashboard shows only one).
+    for (const el of stripComments(s).match(/<[a-z][^>]*\sdata-goatcounter-click="[^"]*"[^>]*>/gi) || []) {
+      const name = el.match(/\sdata-goatcounter-click="([^"]*)"/)[1];
+      const title = (el.match(/\sdata-goatcounter-title="([^"]*)"/) || [])[1];
+      if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name)) error(page, `click event "${name}" should be lowercase words joined by hyphens`);
+      if (!title) error(page, `click event "${name}" needs a data-goatcounter-title`);
+      else if (!eventTitles.has(name)) eventTitles.set(name, title);
+      else if (eventTitles.get(name) !== title) {
+        error(page, `click event "${name}" has two titles ("${eventTitles.get(name)}" and "${title}")`);
+        eventTitles.set(name, title);
       }
     }
 

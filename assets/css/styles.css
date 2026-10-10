@@ -1691,6 +1691,11 @@ svg {
   gap: 0.5rem 2rem;
 }
 
+/* The analytics notice gets its own line under the copyright and links. */
+.site-footer__note {
+  flex-basis: 100%;
+}
+
 /* 8b. "How I work" article page ------------------------------------------ */
 
 .article__container {
@@ -1943,6 +1948,78 @@ svg {
 
 .cta-card:hover .btn {
   border-color: var(--text-faint);
+}
+
+/* 8c. Unlisted /admin/ page (site statistics) ----------------------------- */
+
+.article code {
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg-subtle);
+  color: var(--text);
+  font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  overflow-wrap: anywhere;
+}
+
+.article__header .article__actions,
+.article__part .article__actions {
+  margin-top: 1.75rem;
+}
+
+.admin-status {
+  margin-top: 0.875rem;
+  color: var(--text-faint);
+  font-size: 0.875rem;
+}
+
+.admin-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-list > li,
+.admin-list > div {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.admin-list dd {
+  margin: 0;
+}
+
+.admin-list code {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* Short code inside a sentence stays on one line; full URLs in the lists may wrap. */
+.article__intro code,
+.admin-note code {
+  white-space: nowrap;
+}
+
+@media (min-width: 40rem) {
+  .admin-list > div {
+    display: grid;
+    grid-template-columns: 11.5rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 1rem;
+  }
+}
+
+.admin-note {
+  margin-top: 1.25rem;
+  color: var(--text-muted);
 }
 
 /* 9. Print — produces a clean, two-page résumé ---------------------------- */

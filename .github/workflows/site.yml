@@ -49,6 +49,7 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
 
       - name: Render résumé PDF from the print layout
+        # GoatCounter ignores 127.0.0.1, so this render is never counted as a visit (the checks forbid allow_local).
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/dev/null 2>&1 &
           sleep 2
