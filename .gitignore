@@ -1,1 +1,4 @@
 _site/
+# Claude Code keeps worktrees and launch settings here; only the skills are shared.
+.claude/*
+!.claude/skills/

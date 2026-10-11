@@ -24,6 +24,11 @@ career summary. The full résumé lives in the downloadable PDF.
 | `CLAUDE.md` | Rules and the definition of done for Claude Code sessions working on the site (not deployed) |
 | `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules), run locally and on every push |
 | `.github/workflows/site.yml` | Checks every change, rebuilds the résumé PDF, and deploys only when the checks pass |
+| `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
+| `.github/workflows/codeql.yml` | CodeQL scans the JavaScript for security problems on every push and weekly |
+| `.github/dependabot.yml` | Monthly update pull requests for the GitHub Actions the workflows use |
+| `.github/pull_request_template.md` | The checklist every pull request starts from |
+| `.claude/skills/verify/SKILL.md` | The `verify` skill: Claude runs `scripts/check-site.mjs` before each commit (not deployed) |
 | `favicon.svg`, `apple-touch-icon.png` | Browser tab and home-screen icons |
 | `404.html` | Custom "page not found" page; counts the missing address so broken inbound links show up in the statistics |
 | `admin/index.html` | Unlisted "Site statistics" page for you: a link to the GoatCounter dashboard and the switch that stops counting your own visits (not linked from the site, `noindex`, never counted) |
