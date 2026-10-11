@@ -46,6 +46,35 @@ const PRIVACY_PATTERNS = [
 // Sites that refuse automated requests (LinkedIn answers 999); they are skipped, not failed.
 const SKIP_EXTERNAL = [/^https:\/\/(www\.)?linkedin\.com\//];
 
+// GitHub activity under Projects: the Site workflow writes this snapshot on each deploy, and main.js shows it,
+// calling GitHub's API only when it's stale or missing. It isn't committed; a local copy is checked when present.
+const GITHUB_SNAPSHOT = 'assets/data/github.json';
+const SNAPSHOT_READER_AND_WRITER = ['assets/js/main.js', '.github/workflows/site.yml'];
+const isText = (v) => typeof v === 'string';
+const isDate = (v) => isText(v) && /^\d{4}-\d{2}-\d{2}T/.test(v) && !Number.isNaN(Date.parse(v));
+const orNull = (test) => (v) => v === null || test(v);
+// The fields main.js reads from each commit and repo, and what each must hold.
+const SNAPSHOT_FIELDS = {
+  commits: {
+    html_url: (v) => isText(v) && v.startsWith('https://github.com/'),
+    parents: Array.isArray,
+    'commit.author.date': isDate,
+    'commit.message': isText,
+  },
+  repos: {
+    name: isText,
+    html_url: isText,
+    description: orNull(isText),
+    fork: (v) => typeof v === 'boolean',
+    archived: (v) => typeof v === 'boolean',
+    pushed_at: isDate,
+    topics: orNull((v) => Array.isArray(v) && v.every(isText)),
+    language: orNull(isText),
+    stargazers_count: Number.isInteger,
+    homepage: orNull(isText),
+  },
+};
+
 const IN_ACTIONS = process.env.GITHUB_ACTIONS === 'true';
 const problems = [];
 const report = (level, file, message) => problems.push({ level, file, message });
@@ -196,12 +225,67 @@ function checkAssets() {
     }
   }
 
-  for (const file of ['assets/js/main.js', 'README.md']) {
+  for (const file of ['assets/js/main.js', 'README.md', GITHUB_SNAPSHOT]) {
     if (!exists(file)) continue;
     for (const { name, re } of PRIVACY_PATTERNS) {
       const hit = read(file).match(re);
       if (hit) error(file, `possible ${name}: "${hit[0]}"`);
     }
+  }
+}
+
+/** The first item in `list` with a field that doesn't hold what main.js expects, as "[3].pushed_at", or null. */
+const badField = (list, fields) => {
+  for (const [i, item] of list.entries()) {
+    for (const [path, ok] of Object.entries(fields)) {
+      const value = path.split('.').reduce((v, key) => (v && typeof v === 'object' ? v[key] : undefined), item);
+      if (!ok(value)) return `[${i}].${path}`;
+    }
+  }
+  return null;
+};
+
+/** A file's text without its whole-line comments (// in JavaScript, # in YAML and shell). */
+const withoutLineComments = (s) => s.split('\n').filter((line) => !/^\s*(\/\/|#)/.test(line)).join('\n');
+
+function checkGitHubSnapshot() {
+  // main.js reads the snapshot from where the Site workflow writes it; a mention in a comment doesn't count.
+  for (const file of SNAPSHOT_READER_AND_WRITER) {
+    if (exists(file) && !withoutLineComments(read(file)).includes(GITHUB_SNAPSHOT)) {
+      error(file, `must use ${GITHUB_SNAPSHOT}: the Site workflow writes the GitHub snapshot there and main.js reads it`);
+    }
+  }
+  if (!exists(GITHUB_SNAPSHOT)) return;
+
+  let snapshot;
+  try {
+    snapshot = JSON.parse(read(GITHUB_SNAPSHOT));
+  } catch (e) {
+    error(GITHUB_SNAPSHOT, `is not valid JSON: ${e.message}`);
+    return;
+  }
+  const { generatedAt, commits, repos } = snapshot ?? {};
+  if (!isDate(generatedAt)) error(GITHUB_SNAPSHOT, '"generatedAt" must be an ISO date and time');
+
+  if (!commits || typeof commits !== 'object' || Array.isArray(commits)) {
+    error(GITHUB_SNAPSHOT, '"commits" must be an object of lists, keyed by "owner/repo"');
+  } else {
+    for (const [repo, list] of Object.entries(commits)) {
+      if (!Array.isArray(list)) { error(GITHUB_SNAPSHOT, `commits["${repo}"] must be a list`); continue; }
+      const bad = badField(list, SNAPSHOT_FIELDS.commits);
+      if (bad) error(GITHUB_SNAPSHOT, `commits["${repo}"]${bad} is missing or not what main.js expects`);
+    }
+    // A list for every repo whose commits the home page shows.
+    for (const repo of exists('index.html') ? attrs(html('index.html'), 'data-gh-commits') : []) {
+      if (!Array.isArray(commits[repo])) error(GITHUB_SNAPSHOT, `has no commits for ${repo}, which index.html shows`);
+    }
+  }
+
+  if (!Array.isArray(repos)) {
+    error(GITHUB_SNAPSHOT, '"repos" must be a list');
+  } else {
+    const bad = badField(repos, SNAPSHOT_FIELDS.repos);
+    if (bad) error(GITHUB_SNAPSHOT, `repos${bad} is missing or not what main.js expects`);
   }
 }
 
@@ -236,7 +320,7 @@ async function checkExternalLinks() {
 }
 
 const started = Date.now();
-if (CHECK_INTERNAL) { checkPages(); checkAssets(); }
+if (CHECK_INTERNAL) { checkPages(); checkAssets(); checkGitHubSnapshot(); }
 const externalCount = CHECK_EXTERNAL ? await checkExternalLinks() : 0;
 
 for (const { level, file, message } of problems) {

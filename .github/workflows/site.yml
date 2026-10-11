@@ -1,5 +1,6 @@
-# Checks every change, rebuilds the résumé PDF from the page's print layout, and deploys to GitHub Pages
-# only when the checks pass. A weekly run re-checks external links, which can break without any change here.
+# Checks every change, snapshots the GitHub activity the page shows, rebuilds the résumé PDF from the page's
+# print layout, and deploys to GitHub Pages only when the checks pass. A daily run redeploys so the snapshot
+# stays under a day old; a weekly run re-checks external links, which can break without any change here.
 #
 # One-time setup: Settings → Pages → Build and deployment → Source → "GitHub Actions".
 # Until then, the checks still run and the deploy step is skipped with a notice.
@@ -11,8 +12,10 @@ on:
     branches: [master]
   pull_request:
   workflow_dispatch:
+  # The jobs below tell these two apart by their cron text: change it there too.
   schedule:
-    - cron: "0 13 * * 1" # Mondays, 9:00 Toronto time (EDT)
+    - cron: "0 13 * * 1" # Mondays, 9:00 Toronto time (EDT): external links
+    - cron: "47 11 * * *" # Daily, 7:47 Toronto time (EDT): redeploy with a fresh GitHub snapshot
 
 permissions:
   contents: read
@@ -27,6 +30,8 @@ jobs:
 
   links:
     name: Check external links
+    # Every push, pull request and manual run, and the Monday run; not the daily redeploy.
+    if: github.event.schedule != '47 11 * * *'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -35,7 +40,7 @@ jobs:
   build:
     name: Build site and résumé PDF
     needs: check
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.schedule == '47 11 * * *'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,6 +49,61 @@ jobs:
       pages-source: ${{ steps.source.outputs.build_type }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Snapshot GitHub activity for the project cards
+        # main.js shows this snapshot and calls GitHub's API from the visitor's browser only when it's over 12 hours
+        # old or missing, so visitors seldom meet the API's anonymous limit (60 requests an hour per address). This
+        # step uses the workflow's token, and runs before the PDF render so that render makes no API calls either.
+        # If anything fails, the site deploys without the file and the page calls the API as it did before.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          out=assets/data/github.json
+          work="$RUNNER_TEMP/github"
+          mkdir -p "$work"
+          skip() {
+            echo "::warning title=GitHub snapshot::$1 The site deploys without it, so visitors' browsers call GitHub's API instead."
+            rm -f "$out"
+            exit 0
+          }
+
+          # The repos and the user main.js shows, read from index.html (comments left out) so they're named once.
+          page=$(perl -0777 -pe 's/<!--.*?-->//gs' < index.html) || skip "Could not read index.html."
+          repos=$(grep -o 'data-gh-commits="[^"]*"' <<<"$page" | cut -d '"' -f 2 | sort -u || true)
+          user=$(grep -o 'data-gh-repos="[^"]*"' <<<"$page" | head -n 1 | cut -d '"' -f 2 || true)
+          taken=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          # Only the fields main.js uses. Merge commits, forks and the like stay in: main.js filters them.
+          echo '{}' > "$work/commits.json"
+          for repo in $repos; do
+            timeout 30 gh api "repos/$repo/commits?per_page=10" > "$work/response.json" || skip "Could not fetch the commits of $repo."
+            jq -e --arg repo "$repo" --slurpfile response "$work/response.json" '
+              ($response[0] | arrays) as $list
+              | .[$repo] = [$list[] | {
+                  html_url,
+                  parents: [.parents[] | {sha}],
+                  commit: {author: {date: .commit.author.date}, message: (.commit.message // "" | split("\n")[0] // "")}
+                }]' "$work/commits.json" > "$work/next.json" || skip "GitHub's answer for the commits of $repo wasn't a list."
+            mv "$work/next.json" "$work/commits.json"
+          done
+
+          echo '[]' > "$work/repos.json"
+          if [ -n "$user" ]; then
+            timeout 30 gh api "users/$user/repos?sort=pushed&per_page=100" > "$work/response.json" || skip "Could not fetch the repos of $user."
+            jq -e 'arrays | map({name, html_url, description, fork, archived, pushed_at, topics, language, stargazers_count, homepage})' \
+              "$work/response.json" > "$work/repos.json" || skip "GitHub's answer for the repos of $user wasn't a list."
+          fi
+
+          mkdir -p "$(dirname "$out")"
+          jq -c -n --arg taken "$taken" --slurpfile commits "$work/commits.json" --slurpfile repos "$work/repos.json" \
+            '{generatedAt: $taken, commits: $commits[0], repos: $repos[0]}' > "$out" || skip "Could not write the snapshot."
+
+          # The site checks again, now with the snapshot in place: they check its shape.
+          if ! GITHUB_ACTIONS=false node scripts/check-site.mjs > "$work/check.txt"; then
+            cat "$work/check.txt"
+            skip "The snapshot failed the site checks."
+          fi
+          echo "GitHub snapshot taken $taken: $(jq '[.commits[] | length] | add // 0' "$out") commits of $(jq '.commits | length' "$out") repo(s), $(jq '.repos | length' "$out") repos of ${user:-no user}."
 
       - name: Install PDF tools
         run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
