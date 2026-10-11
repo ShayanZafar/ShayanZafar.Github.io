@@ -43,4 +43,4 @@ read it before changing anything.
 
 - `node scripts/check-site.mjs`: structure, links between pages, copy and privacy rules (what CI runs).
   `--external` adds every external link; `--external-only` checks only those.
-- `python3 -m http.server 4173` (on Windows `py -3 -m http.server 4173`): local preview.
+- `scripts/preview.cmd` (Windows), `scripts/preview.command` (macOS) or `scripts/preview.sh` (Linux): local preview at http://localhost:4173, the same as `python3 -m http.server 4173` (on Windows `py -3 -m http.server 4173`).

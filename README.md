@@ -22,6 +22,7 @@ career summary. The full résumé lives in the downloadable PDF.
 | `assets/img/og-image.png` | Link-preview image shown when the URL is shared on LinkedIn, Slack, etc. (1200×627) |
 | `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, rebuilt from the page's print layout on every deploy |
 | `CLAUDE.md` | Rules and the definition of done for Claude Code sessions working on the site (not deployed) |
+| `scripts/preview.cmd`, `scripts/preview.command`, `scripts/preview.sh` | Double-click (Windows, macOS) or run (Linux) to preview the site at http://localhost:4173 (not deployed) |
 | `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules), run locally and on every push |
 | `.github/workflows/site.yml` | Checks every change, rebuilds the résumé PDF, and deploys only when the checks pass |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
