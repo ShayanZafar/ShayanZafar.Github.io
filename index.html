@@ -31,10 +31,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Newsreader:opsz,wght@6..72,400..600&display=swap">
-  <link rel="stylesheet" href="assets/css/styles.css?v=2026-10-10a">
+  <link rel="stylesheet" href="assets/css/styles.css?v=2026-10-11a">
 
   <script>document.documentElement.classList.add('js')</script>
-  <script src="assets/js/main.js?v=2026-10-10a" defer></script>
+  <script src="assets/js/main.js?v=2026-10-11a" defer></script>
 
   <!-- Anonymous, cookie-free visit statistics (GoatCounter). Visits from localhost and 127.0.0.1 are never counted. -->
   <script data-goatcounter="https://shayanzafar.goatcounter.com/count" src="https://gc.zgo.at/count.js" defer></script>
@@ -539,7 +539,7 @@
                 <div>
                   <h4 class="mini-heading">
                     Recent commits
-                    <span class="live-badge" data-gh-live hidden><span class="live-badge__dot" aria-hidden="true"></span>Live</span>
+                    <span class="live-badge" data-gh-source hidden></span>
                   </h4>
                   <ol class="commits" data-gh-commits="ShayanZafar/ThirteenF">
                     <li><a href="https://github.com/ShayanZafar/ThirteenF/commit/ba70480f1826148c456470a6bba5c13ad4e3e23c"><time datetime="2026-10-03T16:03:34Z">Oct 3</time><span>Show where the money moves: net 13F flow, who moved, manager pages (Phase 7)</span></a></li>
@@ -589,10 +589,11 @@
             </article>
           </div>
 
-          <!-- Filled in live from the GitHub API: own public repos (never forks, or archived ones) pushed in the
-               last data-gh-days days, plus any tagged "portfolio". Tag a repo "hide-from-site" to leave it out. -->
+          <!-- Filled in from GitHub (the snapshot published with the site, or the API when that's over 12 hours old):
+               own public repos (never forks, or archived ones) pushed in the last data-gh-days days, plus any tagged
+               "portfolio". Tag a repo "hide-from-site" to leave it out. -->
           <div class="more-repos" data-gh-repos-block hidden>
-            <h3 class="mini-heading">More on GitHub</h3>
+            <h3 class="mini-heading">More on GitHub <span class="live-badge" data-gh-source hidden></span></h3>
             <ul class="repos" data-gh-repos="ShayanZafar" data-gh-exclude="ShayanZafar.Github.io, ThirteenF, CImg" data-gh-days="365" data-gh-max="6"></ul>
           </div>
           <p class="projects__all">

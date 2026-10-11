@@ -57,14 +57,84 @@
     document.querySelectorAll('main > section[id]').forEach((section) => observer.observe(section));
   }
 
-  // Live project activity from the GitHub API. The HTML ships with a snapshot,
-  // so the section still reads correctly if the API is slow, blocked or rate-limited.
+  // Project activity from GitHub. Each deploy publishes a snapshot of it (assets/data/github.json, written by
+  // the Site workflow), so the cards don't depend on GitHub's limit for anonymous visitors (60 API requests an
+  // hour per address). The page shows the snapshot and calls GitHub's API only when the snapshot is missing or
+  // over 12 hours old. A failed call leaves what's shown: the snapshot, or the commits written into the HTML.
+  const GITHUB_SNAPSHOT = '/assets/data/github.json';
+  const SNAPSHOT_MAX_AGE = 12 * 3600000;
+  const GITHUB_API = 'https://api.github.com/';
+
+  const commitLists = document.querySelectorAll('[data-gh-commits]');
+  const repoList = document.querySelector('[data-gh-repos]');
+
+  // Fetched once, and only on pages that show GitHub activity. A missing or unreadable file reads as null.
+  const snapshot = commitLists.length || repoList
+    ? fetch(GITHUB_SNAPSHOT).then((response) => (response.ok ? response.json() : null)).catch(() => null)
+    : null;
+
+  // Fills one block from the snapshot, then from GitHub's API only if the snapshot is missing or stale.
+  // `pick` finds the block's list in the snapshot, `path` is the API request, `show` renders a list.
+  const fill = async (pick, path, show) => {
+    const data = await snapshot;
+    const takenAt = new Date(data?.generatedAt);
+    let fresh = false;
+    if (data && !Number.isNaN(takenAt.getTime())) {
+      try {
+        const items = pick(data);
+        if (Array.isArray(items)) {
+          show(items, { takenAt });
+          fresh = now - takenAt < SNAPSHOT_MAX_AGE;
+        }
+      } catch {
+        // A snapshot that can't be read counts as missing.
+      }
+    }
+    if (fresh) return;
+
+    try {
+      const response = await fetch(GITHUB_API + path);
+      if (response.ok) show(await response.json(), { live: true });
+    } catch {
+      // Keep what's shown: the snapshot, or what the page shipped with.
+    }
+  };
+
   const relativeDay = (date) => {
     const days = Math.floor((now - date) / 86400000);
     if (days < 1) return 'today';
     if (days < 2) return 'yesterday';
     if (days < 30) return `${days} days ago`;
     return `on ${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  };
+
+  const timeAgo = (date) => {
+    const minutes = Math.floor((now - date) / 60000);
+    if (minutes < 2) return 'just now';
+    if (minutes < 60) return `${minutes} minutes ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours === 1 ? 'an hour ago' : `${hours} hours ago`;
+    return relativeDay(date);
+  };
+
+  // Each block says where its list came from: "Live" from GitHub's API, or "Synced 3 hours ago" from the snapshot.
+  const showSource = (badge, source) => {
+    if (!badge) return;
+    if (source.live) {
+      const dot = document.createElement('span');
+      dot.className = 'live-badge__dot';
+      dot.setAttribute('aria-hidden', 'true');
+      badge.replaceChildren(dot, 'Live');
+      badge.title = 'Loaded from GitHub just now';
+    } else {
+      const time = document.createElement('time');
+      time.dateTime = source.takenAt.toISOString();
+      time.textContent = timeAgo(source.takenAt);
+      badge.replaceChildren('Synced ', time);
+      badge.title = 'From the snapshot of GitHub published with the site';
+    }
+    badge.classList.toggle('live-badge--snapshot', !source.live);
+    badge.hidden = false;
   };
 
   const commitItem = (commit) => {
@@ -85,13 +155,16 @@
     return item;
   };
 
-  document.querySelectorAll('[data-gh-commits]').forEach(async (list) => {
+  commitLists.forEach((list) => {
     const repo = list.dataset.ghCommits;
-    try {
-      const response = await fetch(`https://api.github.com/repos/${repo}/commits?per_page=10`);
-      if (!response.ok) return;
+    const updated = document.querySelector(`[data-gh-updated="${repo}"]`);
+    const kind = document.querySelector(`[data-gh-kind="${repo}"]`);
+    const activeKind = kind?.textContent;
+    const badge = list.closest('.project')?.querySelector('[data-gh-source]');
 
-      const commits = (await response.json())
+    const show = (items, source) => {
+      if (!Array.isArray(items)) return;
+      const commits = items
         .filter((c) => c.parents.length < 2 && c.html_url.startsWith('https://github.com/'))
         .slice(0, 4);
       if (!commits.length) return;
@@ -99,17 +172,15 @@
       list.replaceChildren(...commits.map(commitItem));
 
       const latest = new Date(commits[0].commit.author.date);
-      const updated = document.querySelector(`[data-gh-updated="${repo}"]`);
       if (updated) updated.textContent = `Updated ${relativeDay(latest)}`;
 
       // Only claim "in active development" while there have been commits in the last 90 days.
-      const kind = document.querySelector(`[data-gh-kind="${repo}"]`);
-      if (kind && now - latest > 90 * 86400000) kind.textContent = 'Personal project';
+      if (kind) kind.textContent = now - latest > 90 * 86400000 ? 'Personal project' : activeKind;
 
-      list.closest('.project')?.querySelector('[data-gh-live]')?.removeAttribute('hidden');
-    } catch {
-      // Keep the snapshot.
-    }
+      showSource(badge, source);
+    };
+
+    fill((data) => data.commits?.[repo], `repos/${repo}/commits?per_page=10`, show);
   });
 
   // Other repositories, listed automatically so new projects appear without editing the page:
@@ -175,31 +246,30 @@
     return card;
   };
 
-  const repoList = document.querySelector('[data-gh-repos]');
   if (repoList) {
-    (async () => {
-      const { ghRepos: user, ghExclude = '', ghDays = '365', ghMax = '6' } = repoList.dataset;
-      const exclude = new Set(ghExclude.toLowerCase().split(/[\s,]+/).filter(Boolean));
-      const cutoff = now - Number(ghDays) * 86400000;
-      try {
-        const response = await fetch(`https://api.github.com/users/${user}/repos?sort=pushed&per_page=100`);
-        if (!response.ok) return;
+    const { ghRepos: user, ghExclude = '', ghDays = '365', ghMax = '6' } = repoList.dataset;
+    const exclude = new Set(ghExclude.toLowerCase().split(/[\s,]+/).filter(Boolean));
+    const cutoff = now - Number(ghDays) * 86400000;
+    const block = repoList.closest('[data-gh-repos-block]');
 
-        const repos = (await response.json())
-          .filter((r) => !r.fork && !r.archived && !exclude.has(r.name.toLowerCase()))
-          .filter((r) => {
-            const topics = r.topics || [];
-            if (topics.includes('hide-from-site')) return false;
-            return topics.includes('portfolio') || new Date(r.pushed_at) >= cutoff;
-          })
-          .slice(0, Number(ghMax));
-        if (!repos.length) return;
+    // The block stays hidden until a list arrives; the "All repositories" link works without it.
+    const show = (items, source) => {
+      if (!Array.isArray(items)) return;
+      const repos = items
+        .filter((r) => !r.fork && !r.archived && !exclude.has(r.name.toLowerCase()))
+        .filter((r) => {
+          const topics = r.topics || [];
+          if (topics.includes('hide-from-site')) return false;
+          return topics.includes('portfolio') || new Date(r.pushed_at) >= cutoff;
+        })
+        .slice(0, Number(ghMax));
+      if (!repos.length) return;
 
-        repoList.replaceChildren(...repos.map(repoCard));
-        repoList.closest('[data-gh-repos-block]')?.removeAttribute('hidden');
-      } catch {
-        // Leave the block hidden; the "All repositories" link still works.
-      }
-    })();
+      repoList.replaceChildren(...repos.map(repoCard));
+      block?.removeAttribute('hidden');
+      showSource(block?.querySelector('[data-gh-source]'), source);
+    };
+
+    fill((data) => data.repos, `users/${user}/repos?sort=pushed&per_page=100`, show);
   }
 })();
