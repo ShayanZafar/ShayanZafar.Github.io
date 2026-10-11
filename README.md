@@ -16,15 +16,16 @@ career summary. The full résumé lives in the downloadable PDF.
 | `index.html` | All page content: about and *Now*, how I lead, career, projects, contact. Skills and education are print-only (they appear in the PDF) |
 | `how-i-work/index.html` | "How I work": long-form engineering and management style, each point backed by an example (served at `/how-i-work/`) |
 | `assets/css/styles.css` | Styles, including automatic dark mode and the print/PDF résumé layout |
-| `assets/js/main.js` | Small enhancements: auto-updating "years of experience", career highlight toggles, active nav link, live GitHub commits and repo list |
+| `assets/js/main.js` | Small enhancements: auto-updating "years of experience", career highlight toggles, active nav link, GitHub commits and repo list (from the deploy's snapshot, or GitHub's API when that's stale) |
+| `assets/data/github.json` | Snapshot of the GitHub commits and repos shown under Projects, written by the Site workflow on every deploy and never committed (git-ignored); `main.js` calls GitHub's API only when it's over 12 hours old or missing |
 | `assets/img/shayan-zafar-ahmad.jpg` | Portrait used in the hero (600×600, face-centred crop, metadata stripped) |
 | `assets/img/projects/` | ThirteenF screenshots (light and dark), cropped from the ThirteenF repo's `design/screens/png/` |
 | `assets/img/og-image.png` | Link-preview image shown when the URL is shared on LinkedIn, Slack, etc. (1200×627) |
 | `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, rebuilt from the page's print layout on every deploy |
 | `CLAUDE.md` | Rules and the definition of done for Claude Code sessions working on the site (not deployed) |
 | `scripts/preview.cmd`, `scripts/preview.command`, `scripts/preview.sh` | Double-click (Windows, macOS) or run (Linux) to preview the site at http://localhost:4173 (not deployed) |
-| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules), run locally and on every push |
-| `.github/workflows/site.yml` | Checks every change, rebuilds the résumé PDF, and deploys only when the checks pass |
+| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot), run locally and on every push |
+| `.github/workflows/site.yml` | Checks every change, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
 | `.github/workflows/codeql.yml` | CodeQL scans the JavaScript for security problems on every push and weekly |
 | `.github/dependabot.yml` | Monthly update pull requests for the GitHub Actions the workflows use |
@@ -46,13 +47,17 @@ The résumé PDF rebuilds itself on every deploy, so the download always matches
 
 **Now section:** update the two lines and the "Updated" month in the About section when your focus changes.
 
-**Live GitHub activity:** the Projects section lists ThirteenF's latest commits. `main.js` fetches them from the public
-GitHub API in each visitor's browser (`data-gh-commits="owner/repo"`), skipping merge commits. The commits written
-into `index.html` are a fallback snapshot, shown if the API is slow, blocked or rate-limited, so refresh them
-occasionally. To feature another repo, copy the project card and change the `data-gh-*` attributes.
+**GitHub activity:** the Projects section lists ThirteenF's latest commits (`data-gh-commits="owner/repo"`, merge
+commits skipped) and your other repos (below). Each deploy writes a snapshot of both to `assets/data/github.json`, and
+`main.js` shows it. It calls the public GitHub API from the visitor's browser only when the snapshot is over 12 hours
+old or missing, so visitors seldom meet GitHub's limit of 60 anonymous requests an hour, and if that call fails, what's
+on screen stays. A label beside each list says where it came from: "Synced 3 hours ago" for the snapshot, "Live" for
+the API. The commits written into `index.html` are the last resort, shown without JavaScript or when neither the
+snapshot nor the API answers, so refresh them occasionally. To feature another repo, copy the project card and change
+the `data-gh-*` attributes; the next deploy adds it to the snapshot.
 
-**New repos appear automatically:** under Projects, "More on GitHub" lists your own public repos, fetched live, so a
-new repo shows up on the next page load after you push to it. The rules:
+**New repos appear automatically:** under Projects, "More on GitHub" lists your own public repos, so a new repo shows
+up within a day of your first push to it (the site redeploys daily), or sooner when this site is pushed. The rules:
 
 - Forks and archived repos are never shown. Neither is anything in `data-gh-exclude` (this site, the featured
   ThirteenF card, and CImg, which is a copy of an open-source library).
@@ -96,22 +101,36 @@ py -3 -m http.server 4173
 
 Then open http://localhost:4173.
 
+The snapshot of GitHub activity is written only at deploy time, so a local preview gets the GitHub cards from the API.
+To test the page with a snapshot, save one as `assets/data/github.json` (git-ignored); `check-site.mjs` checks its shape.
+
 ## Checks and deployment
 
-Every push to `master` runs the **Site** workflow (`.github/workflows/site.yml`):
+The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `master` and daily at 7:47 Toronto time
+(EDT):
 
 1. **Checks** (`scripts/check-site.mjs`): every local link, image and anchor resolves; one `<h1>` per page; no
    duplicate ids; images have alt text; new-tab links are safe; `?v=` asset versions match across pages; and the
    site's own rules: no phone number or postal code, and no casual or placeholder wording. Visit statistics: every
    public page loads GoatCounter once and shows the footer notice, click events are named consistently, and
-   `/admin/` stays unlisted (no GoatCounter, `noindex`, and no page links to it).
-2. **Résumé PDF:** rebuilt from the page's print layout with headless Chrome, then verified: the name, section
+   `/admin/` stays unlisted (no GoatCounter, `noindex`, and no page links to it). GitHub snapshot: `main.js` and the
+   workflow use the same path, and a snapshot, when there is one, has the fields `main.js` reads, a list for every
+   `data-gh-commits` repo, and no phone number or postal code.
+2. **GitHub snapshot:** fetches what the Projects section shows (the commits of each `data-gh-commits` repo and the
+   repos of the `data-gh-repos` user, both read from `index.html`) with the workflow's own token, keeps only the
+   fields `main.js` uses and writes `assets/data/github.json`. The checks then run again with it in place. If a fetch
+   or a check fails, the run shows a warning and the site deploys without the file, so browsers call the API instead.
+3. **Résumé PDF:** rebuilt from the page's print layout with headless Chrome, then verified: the name, section
    headings, dates and "T-SQL" must survive in the text layer, there must be no phone number, and it warns if the
    PDF runs past 2 pages.
-3. **Deploy:** publishes to GitHub Pages only if the checks pass.
+4. **Deploy:** publishes to GitHub Pages only if the checks pass.
 
-External links are checked on every push and every Monday. A broken one fails the run, and GitHub emails you, but it
-doesn't block the deploy.
+The daily run keeps the snapshot under a day old without a push. GitHub turns off scheduled runs in a repo that has
+had no pushes for 60 days; turn them back on under **Actions → Site → Enable workflow**. Until then the page falls
+back to the API.
+
+External links are checked on every push and every Monday (not on the daily run). A broken one fails the run, and
+GitHub emails you, but it doesn't block the deploy.
 
 Run the checks before pushing (add `--external` to include external links):
 

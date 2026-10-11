@@ -11,7 +11,8 @@ read it before changing anything.
 - `admin/index.html`: an unlisted page for the owner (GoatCounter dashboard link, the switch that stops
   counting their own visits).
 - `assets/css/styles.css`: every style, including dark mode and the print layout the résumé PDF is made from.
-- `assets/js/main.js`: small enhancements (years of experience, live GitHub commits and repo list).
+- `assets/js/main.js`: small enhancements (years of experience, GitHub commits and repo list, shown from the
+  snapshot `assets/data/github.json` the Site workflow writes on each deploy; GitHub's API only when it's stale).
 - `scripts/check-site.mjs`: the site's checks. `.github/workflows/site.yml`: runs them, rebuilds the résumé
   PDF from the print layout and deploys only when they pass.
 
