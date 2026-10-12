@@ -22,15 +22,19 @@ career summary. The full résumé lives in the downloadable PDF.
 | `assets/img/projects/` | ThirteenF screenshots (light and dark), cropped from the ThirteenF repo's `design/screens/png/` |
 | `assets/img/og-image.png` | Link-preview image shown when the URL is shared on LinkedIn, Slack, etc. (1200×627) |
 | `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, rebuilt from the page's print layout on every deploy |
-| `CLAUDE.md` | Rules and the definition of done for Claude Code sessions working on the site (not deployed) |
+| `CLAUDE.md` | Claude Code's standing instructions for the site (rules, the definition of done, commands), loaded with every request and kept within 600 words (not deployed; see [Instructions for Claude](#instructions-for-claude)) |
+| `.claude/rules/` | Claude's rules for one area each, loaded only when Claude touches the files they're for: `resume-print.md` and `visit-statistics.md` (not deployed) |
 | `scripts/preview.cmd`, `scripts/preview.command`, `scripts/preview.sh` | Double-click (Windows, macOS) or run (Linux) to preview the site at http://localhost:4173 (not deployed) |
-| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot, the core-flows map), run locally and on every push |
+| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot, the core-flows map, what isn't deployed, Claude's instruction files), run locally and on every push |
+| `scripts/instruction-files.mjs` | The pure parts of the check of Claude's instruction files (word counts, `paths` globs), used by `check-site.mjs` and unit-tested (not deployed) |
+| `tests/unit/` | Unit tests of the checks, run with `node --test` (Node's built-in test runner, no packages) locally and on every push (not deployed) |
 | `docs/core-flows.md` | The core flows a visitor or you rely on, each with the unit, integration and UI tests that cover it, and how many gaps are still allowed (not deployed) |
 | `docs/decisions.md` | Decisions you made, one line each (date, decision, why, issue); pending decisions and debt are GitHub issues labelled `decision` and `debt` (not deployed) |
 | `.github/ISSUE_TEMPLATE/` | The forms for a new `debt` or `decision` issue |
 | `.github/workflows/site.yml` | Checks every change, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
 | `.github/workflows/claude-backlog.yml` | When you comment on a `decision` or `debt` issue, Claude records your answer in `docs/decisions.md`, does the work it calls for and opens a pull request (the `backlog` skill; not deployed) |
+| `.github/workflows/auto-merge.yml` | Merges a bot's pull request (Dependabot's minor and patch updates) once every check on it has passed; yours are never touched |
 | `.github/workflows/codeql.yml` | CodeQL scans the JavaScript for security problems on every push and weekly |
 | `.github/dependabot.yml` | Monthly update pull requests for the GitHub Actions the workflows use |
 | `.github/pull_request_template.md` | The checklist every pull request starts from |
@@ -124,7 +128,11 @@ The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `mast
    a unit, an integration and a UI test (`file` › exact test title) or marks the gap with `—`; each named test must
    exist under that title, and the number of gaps must equal `Gaps allowed:`, which only ever goes down. Unit tests
    use Node's built-in test runner (`node:test`) and UI tests use Playwright, run with `npx` in CI only, so neither
-   adds anything to the served files.
+   adds anything to the served files. Not deployed: the workflow's Assemble site step leaves out `.git`, `.github`,
+   `.claude`, `scripts`, `docs`, `tests`, `.gitignore` and `CLAUDE.md`. Instructions for Claude: `CLAUDE.md` stays
+   within 600 words, and each `.claude/rules/` file lists the files it's for under `paths` (every glob must match a
+   file in the repo), stays within 500 words, not counting that list, and isn't ignored by git. Then the checks' own
+   unit tests (`tests/unit/`) run with `node --test`.
 2. **GitHub snapshot:** fetches what the Projects section shows (the commits of each `data-gh-commits` repo and the
    repos of the `data-gh-repos` user, both read from `index.html`) with the workflow's own token, keeps only the
    fields `main.js` uses and writes `assets/data/github.json`. The checks then run again with it in place. If a fetch
@@ -141,10 +149,12 @@ back to the API.
 External links are checked on every push and every Monday (not on the daily run). A broken one fails the run, and
 GitHub emails you, but it doesn't block the deploy.
 
-Run the checks before pushing (add `--external` to include external links):
+Run the checks before pushing (add `--external` to include external links), and the unit tests when you change
+`scripts/` or `tests/`:
 
 ```bash
 node scripts/check-site.mjs
+node --test
 ```
 
 **Setup:** GitHub Pages is set to deploy from **GitHub Actions** (Settings → Pages → Build and deployment → Source), so
@@ -157,6 +167,23 @@ The PDF committed in the repo is only used for local preview. To refresh it loca
 ```bash
 "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" --headless=new --no-pdf-header-footer --print-to-pdf=assets/Shayan_Zafar_Ahmad_Resume.pdf http://localhost:4173/
 ```
+
+## Instructions for Claude
+
+Claude Code reads this repo's Markdown in two ways. Its instructions load by themselves: `CLAUDE.md` with every
+request, and each file in `.claude/rules/` only when Claude reads or edits a file its `paths` globs match.
+Documentation (this README and `docs/`) is read when a task needs it. The skills in `.claude/skills/` are
+procedures Claude follows when one is called for.
+
+| Rules file | Loads when Claude touches |
+| --- | --- |
+| `.claude/rules/resume-print.md` (the résumé PDF) | `index.html`, `assets/css/styles.css`, `.github/workflows/site.yml` |
+| `.claude/rules/visit-statistics.md` (GoatCounter, `/admin/`) | any page (`**/*.html`) |
+
+Long instructions get followed less carefully, so a rule that matters for one area goes in that area's rules file
+(or a new one, with `paths`), not in `CLAUDE.md`. The checks keep both small: they fail when `CLAUDE.md` passes
+600 words or a rules file passes 500, has no `paths`, or names a glob that matches no file. The two budgets are
+`CLAUDE_MD_MAX_WORDS` and `RULE_MAX_WORDS` in `scripts/check-site.mjs`.
 
 ## Sharing on LinkedIn
 

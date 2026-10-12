@@ -6,7 +6,7 @@
 
 ## How it was checked
 
-- [ ] `node scripts/check-site.mjs` passes (with `--external` if a link was added or changed)
+- [ ] `node scripts/check-site.mjs` passes (with `--external` if a link was added or changed), and `node --test` if `scripts/` or `tests/` changed
 - [ ] A visible change was previewed in light and dark, at phone width, and in print preview if it touches the résumé
 - [ ] A changed or new core flow has unit, integration and UI tests named in docs/core-flows.md
 - [ ] `README.md` still matches the site (new file, page, rule or click event added to its tables)

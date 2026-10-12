@@ -5,6 +5,10 @@ step and no dependencies: HTML, one stylesheet and a little JavaScript, served a
 `README.md` is the full guide (what each file is for, how editing, visit statistics and deployment work);
 read it before changing anything.
 
+Instructions for Claude are this file (at most 600 words, checked by `scripts/check-site.mjs`) and
+`.claude/rules/` (one area each, loaded only when Claude touches a file its `paths` match); everything else is
+documentation, read when needed.
+
 ## Where things are
 
 - `index.html`: all the home page's content. `how-i-work/index.html`: the long-form page. `404.html`.
@@ -25,12 +29,6 @@ read it before changing anything.
 - No phone number or postal code anywhere public, including the PDF. Copy stays professional, with no
   placeholders; the banned phrases are in `scripts/check-site.mjs`.
 - When `styles.css` or `main.js` changes, bump the `?v=` date on their links in every page, together.
-- `admin/` stays unlisted: no page links to it, `noindex`, and no GoatCounter script. Every public page
-  loads GoatCounter once and shows the footer notice; never turn on `allow_local`.
-- A tracked link carries both `data-goatcounter-click` (lowercase-hyphenated) and `data-goatcounter-title`;
-  reuse an existing name and title where one fits.
-- The print layout is the résumé: a change to `index.html` or the print styles changes the PDF. It must
-  keep the text the workflow looks for (name, section headings, dates, "T-SQL") and stay at 2 pages.
 - Never commit secrets or personal contact details beyond what the page already shows.
 
 ## Definition of done
@@ -38,7 +36,7 @@ read it before changing anything.
 - `node scripts/check-site.mjs` passes. Show its last line in your summary. Add `--external` when you
   added or changed an external link.
 - For a visible change, preview it (`python3 -m http.server 4173`, then http://localhost:4173) in light
-  and dark, at phone width, and in print preview when the change touches the résumé.
+  and dark, and at phone width.
 - Every core flow in `docs/core-flows.md` names a test at each level: unit (one module, no network; Node's
   built-in `node:test`, no package), integration (several parts together, outside services played by stand-ins)
   and UI (Playwright driving the running site, run with `npx` in CI only). Tests and their tools never go in the
@@ -49,7 +47,8 @@ read it before changing anything.
 
 ## Commands
 
-- `node scripts/check-site.mjs`: structure, links between pages, copy and privacy rules, and the core-flows
-  map (what CI runs).
+- `node scripts/check-site.mjs`: structure, links between pages, copy and privacy rules, the core-flows map,
+  what isn't deployed and the instruction files (what CI runs).
   `--external` adds every external link; `--external-only` checks only those.
+- `node --test`: the unit tests in `tests/unit/` (CI runs them too).
 - `scripts/preview.cmd` (Windows), `scripts/preview.command` (macOS) or `scripts/preview.sh` (Linux): local preview at http://localhost:4173, the same as `python3 -m http.server 4173` (on Windows `py -3 -m http.server 4173`).

@@ -27,6 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: node scripts/check-site.mjs
+      - name: Unit tests of the checks (tests/unit)
+        run: node --test
 
   links:
     name: Check external links
@@ -141,7 +143,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p "$RUNNER_TEMP/site"
-          rsync -a --exclude '.git' --exclude '.github' --exclude '.claude' --exclude 'scripts' --exclude 'docs' --exclude '.gitignore' --exclude 'CLAUDE.md' ./ "$RUNNER_TEMP/site/"
+          rsync -a --exclude '.git' --exclude '.github' --exclude '.claude' --exclude 'scripts' --exclude 'docs' --exclude 'tests' --exclude '.gitignore' --exclude 'CLAUDE.md' ./ "$RUNNER_TEMP/site/"
 
       - uses: actions/upload-pages-artifact@v5
         with:

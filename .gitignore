@@ -1,6 +1,7 @@
 _site/
 # Written by the Site workflow on each deploy; a local copy is only for testing the page.
 assets/data/github.json
-# Claude Code keeps worktrees and launch settings here; only the skills are shared.
+# Claude Code keeps worktrees and launch settings here; only the skills and rules are shared.
 .claude/*
 !.claude/skills/
+!.claude/rules/
