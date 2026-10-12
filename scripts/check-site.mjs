@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Checks for shayanzafar.github.io. No dependencies, so it runs the same locally and in GitHub Actions.
 //
-//   node scripts/check-site.mjs                  structure, links between pages, copy and privacy rules
+//   node scripts/check-site.mjs                  structure, links between pages, copy and privacy rules, core flows
 //   node scripts/check-site.mjs --external       ...plus every external link
 //   node scripts/check-site.mjs --external-only  only external links
 //   --root <dir>                                 check a different folder (used to test the checks)
@@ -74,6 +74,10 @@ const SNAPSHOT_FIELDS = {
     homepage: orNull(isText),
   },
 };
+
+// The core flows and the tests that cover each at every level; see checkCoreFlows().
+const CORE_FLOWS = 'docs/core-flows.md';
+const CORE_FLOW_COLUMNS = ['Flow', 'Unit', 'Integration', 'UI'];
 
 const IN_ACTIONS = process.env.GITHUB_ACTIONS === 'true';
 const problems = [];
@@ -289,6 +293,48 @@ function checkGitHubSnapshot() {
   }
 }
 
+/**
+ * docs/core-flows.md: each flow names a test at every level (`file` › exact title), or — for a gap. Every named
+ * test must exist under that title, and the gap count must equal "Gaps allowed:", which only ever goes down.
+ * Returns the summary line, or null when the file is missing.
+ */
+function checkCoreFlows() {
+  if (!exists(CORE_FLOWS)) { error(CORE_FLOWS, 'is missing: list the core flows and their unit, integration and UI tests'); return null; }
+  const lines = read(CORE_FLOWS).split(/\r?\n/).map((line) => line.trim());
+  const allowedMatch = lines.map((line) => line.match(/^Gaps allowed: *(\d+)$/)).find(Boolean);
+  if (!allowedMatch) error(CORE_FLOWS, 'needs a "Gaps allowed: N" line');
+  const allowed = allowedMatch ? Number(allowedMatch[1]) : 0;
+
+  // Table rows without the |---| line, split into cells on unescaped pipes. The first row is the header.
+  const [header, ...flows] = lines.filter((line) => line.startsWith('|') && !/^[|:\s-]+$/.test(line))
+    .map((line) => line.replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map((cell) => cell.trim().replace(/\\\|/g, '|')));
+  if (header?.join() !== CORE_FLOW_COLUMNS.join()) error(CORE_FLOWS, `the table's columns must be ${CORE_FLOW_COLUMNS.join(' | ')}`);
+  if (!flows.length) error(CORE_FLOWS, 'lists no flows');
+
+  let tests = 0;
+  let gaps = 0;
+  for (const [flow, ...levels] of flows) {
+    if (!flow || levels.length !== 3) { error(CORE_FLOWS, `row "${flow}" needs a flow and three cells (— for a missing test)`); continue; }
+    for (const [i, cell] of levels.entries()) {
+      if (cell === '—') { gaps++; continue; }
+      if (!cell) { error(CORE_FLOWS, `"${flow}" has an empty ${CORE_FLOW_COLUMNS[i + 1]} cell: name a test, or — for a gap`); continue; }
+      for (const ref of cell.split(/\s*<br>\s*/)) {
+        const m = ref.match(/^`([^`]+)` › (.+)$/);
+        if (!m) { error(CORE_FLOWS, `"${flow}" (${CORE_FLOW_COLUMNS[i + 1]}): "${ref}" should be \`file\` › test title, or —`); continue; }
+        const [, file, title] = m;
+        tests++;
+        if (!exists(file) || !statSync(join(ROOT, file)).isFile()) { error(CORE_FLOWS, `"${flow}" names ${file}, which doesn't exist`); continue; }
+        const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const declared = new RegExp(`(?<![\\w.$])(?:test|it|test\\.describe)\\(\\s*(['"\`])${escaped}\\1`);
+        if (!withoutLineComments(read(file)).split('\n').some((line) => declared.test(line))) error(CORE_FLOWS, `"${flow}" names "${title}", which ${file} doesn't declare with test(, it( or test.describe(`);
+      }
+    }
+  }
+  if (allowedMatch && gaps < allowed) error(CORE_FLOWS, `close the gap count: set Gaps allowed: ${gaps}`);
+  if (allowedMatch && gaps > allowed) error(CORE_FLOWS, `a core flow lost a test: ${gaps} gaps, but Gaps allowed: ${allowed}`);
+  return `Core flows: ${flows.length} flows, ${tests} tests named, ${gaps} gaps (allowed ${allowed})`;
+}
+
 async function checkExternalLinks() {
   const links = new Map(); // url -> first page it appears on
   for (const page of PAGES.filter(exists)) {
@@ -320,13 +366,15 @@ async function checkExternalLinks() {
 }
 
 const started = Date.now();
-if (CHECK_INTERNAL) { checkPages(); checkAssets(); checkGitHubSnapshot(); }
+let coreFlows = null;
+if (CHECK_INTERNAL) { checkPages(); checkAssets(); checkGitHubSnapshot(); coreFlows = checkCoreFlows(); }
 const externalCount = CHECK_EXTERNAL ? await checkExternalLinks() : 0;
 
 for (const { level, file, message } of problems) {
   if (IN_ACTIONS) console.log(`::${level} file=${file}::${message}`);
   else console.log(`${level === 'error' ? '✗' : '!'} ${file}: ${message}`);
 }
+if (coreFlows) console.log(coreFlows);
 const errorCount = problems.filter((p) => p.level === 'error').length;
 const scope = [CHECK_INTERNAL && `${PAGES.length} pages`, CHECK_EXTERNAL && `${externalCount} external links`].filter(Boolean).join(' and ');
 console.log(errorCount
