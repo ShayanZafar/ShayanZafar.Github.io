@@ -15,6 +15,7 @@ read it before changing anything.
   snapshot `assets/data/github.json` the Site workflow writes on each deploy; GitHub's API only when it's stale).
 - `scripts/check-site.mjs`: the site's checks. `.github/workflows/site.yml`: runs them, rebuilds the résumé
   PDF from the print layout and deploys only when they pass.
+- `docs/decisions.md`: decisions made, one line each (date, decision, why, issue). Pending decisions and debt are GitHub issues labelled `decision` and `debt`; the `backlog` skill files and closes them. Not deployed.
 - `docs/core-flows.md`: the core flows a visitor or the owner relies on, each with its unit, integration and UI
   tests (`—` marks a gap) and the `Gaps allowed` count; `scripts/check-site.mjs` checks it. Not deployed.
 

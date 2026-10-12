@@ -12,6 +12,7 @@
 - [ ] `README.md` still matches the site (new file, page, rule or click event added to its tables)
 - [ ] `/code-review` was run and its findings were addressed
 - [ ] No unrelated changes are mixed in
+- [ ] Debt found outside this change and decisions it needs are filed as issues (labels `debt`, `decision`); decisions it made are in `docs/decisions.md`
 
 ## Anything the reviewer should look at closely
 
