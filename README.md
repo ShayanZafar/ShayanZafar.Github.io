@@ -26,6 +26,8 @@ career summary. The full résumé lives in the downloadable PDF.
 | `scripts/preview.cmd`, `scripts/preview.command`, `scripts/preview.sh` | Double-click (Windows, macOS) or run (Linux) to preview the site at http://localhost:4173 (not deployed) |
 | `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot, the core-flows map), run locally and on every push |
 | `docs/core-flows.md` | The core flows a visitor or you rely on, each with the unit, integration and UI tests that cover it, and how many gaps are still allowed (not deployed) |
+| `docs/decisions.md` | Decisions you made, one line each (date, decision, why, issue); pending decisions and debt are GitHub issues labelled `decision` and `debt` (not deployed) |
+| `.github/ISSUE_TEMPLATE/` | The forms for a new `debt` or `decision` issue |
 | `.github/workflows/site.yml` | Checks every change, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
 | `.github/workflows/codeql.yml` | CodeQL scans the JavaScript for security problems on every push and weekly |
