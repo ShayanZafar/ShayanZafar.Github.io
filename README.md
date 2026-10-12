@@ -34,6 +34,7 @@ career summary. The full résumé lives in the downloadable PDF.
 | `.github/dependabot.yml` | Monthly update pull requests for the GitHub Actions the workflows use |
 | `.github/pull_request_template.md` | The checklist every pull request starts from |
 | `.claude/skills/verify/SKILL.md` | The `verify` skill: Claude runs `scripts/check-site.mjs` before each commit (not deployed) |
+| `.claude/skills/backlog/SKILL.md` | The `backlog` skill: how Claude files, triages and works the `debt` and `decision` issues (not deployed) |
 | `favicon.svg`, `apple-touch-icon.png` | Browser tab and home-screen icons |
 | `404.html` | Custom "page not found" page; counts the missing address so broken inbound links show up in the statistics |
 | `admin/index.html` | Unlisted "Site statistics" page for you: a link to the GoatCounter dashboard and the switch that stops counting your own visits (not linked from the site, `noindex`, never counted) |
