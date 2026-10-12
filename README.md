@@ -24,7 +24,8 @@ career summary. The full résumé lives in the downloadable PDF.
 | `assets/Shayan_Zafar_Ahmad_Resume.pdf` | Downloadable résumé, rebuilt from the page's print layout on every deploy |
 | `CLAUDE.md` | Rules and the definition of done for Claude Code sessions working on the site (not deployed) |
 | `scripts/preview.cmd`, `scripts/preview.command`, `scripts/preview.sh` | Double-click (Windows, macOS) or run (Linux) to preview the site at http://localhost:4173 (not deployed) |
-| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot), run locally and on every push |
+| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot, the core-flows map), run locally and on every push |
+| `docs/core-flows.md` | The core flows a visitor or you rely on, each with the unit, integration and UI tests that cover it, and how many gaps are still allowed (not deployed) |
 | `.github/workflows/site.yml` | Checks every change, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
 | `.github/workflows/codeql.yml` | CodeQL scans the JavaScript for security problems on every push and weekly |
@@ -115,7 +116,11 @@ The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `mast
    public page loads GoatCounter once and shows the footer notice, click events are named consistently, and
    `/admin/` stays unlisted (no GoatCounter, `noindex`, and no page links to it). GitHub snapshot: `main.js` and the
    workflow use the same path, and a snapshot, when there is one, has the fields `main.js` reads, a list for every
-   `data-gh-commits` repo, and no phone number or postal code.
+   `data-gh-commits` repo, and no phone number or postal code. Core flows: every flow in `docs/core-flows.md` names
+   a unit, an integration and a UI test (`file` › exact test title) or marks the gap with `—`; each named test must
+   exist under that title, and the number of gaps must equal `Gaps allowed:`, which only ever goes down. Unit tests
+   use Node's built-in test runner (`node:test`) and UI tests use Playwright, run with `npx` in CI only, so neither
+   adds anything to the served files.
 2. **GitHub snapshot:** fetches what the Projects section shows (the commits of each `data-gh-commits` repo and the
    repos of the `data-gh-repos` user, both read from `index.html`) with the workflow's own token, keeps only the
    fields `main.js` uses and writes `assets/data/github.json`. The checks then run again with it in place. If a fetch

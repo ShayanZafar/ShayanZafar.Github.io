@@ -15,6 +15,8 @@ read it before changing anything.
   snapshot `assets/data/github.json` the Site workflow writes on each deploy; GitHub's API only when it's stale).
 - `scripts/check-site.mjs`: the site's checks. `.github/workflows/site.yml`: runs them, rebuilds the résumé
   PDF from the print layout and deploys only when they pass.
+- `docs/core-flows.md`: the core flows a visitor or the owner relies on, each with its unit, integration and UI
+  tests (`—` marks a gap) and the `Gaps allowed` count; `scripts/check-site.mjs` checks it. Not deployed.
 
 ## Rules
 
@@ -36,12 +38,17 @@ read it before changing anything.
   added or changed an external link.
 - For a visible change, preview it (`python3 -m http.server 4173`, then http://localhost:4173) in light
   and dark, at phone width, and in print preview when the change touches the résumé.
+- Every core flow in `docs/core-flows.md` names a test at each level: unit (one module, no network; Node's
+  built-in `node:test`, no package), integration (several parts together, outside services played by stand-ins)
+  and UI (Playwright driving the running site, run with `npx` in CI only). Tests and their tools never go in the
+  served files. A changed or new flow comes with its tests; `Gaps allowed` only goes down.
 - `README.md` matches the site: a new file, page, rule or click event goes in its tables and lists.
 - A new site rule goes into `scripts/check-site.mjs` too, so it is checked rather than remembered.
 - Never loosen or remove a check in `scripts/check-site.mjs` or `site.yml` without asking the user first.
 
 ## Commands
 
-- `node scripts/check-site.mjs`: structure, links between pages, copy and privacy rules (what CI runs).
+- `node scripts/check-site.mjs`: structure, links between pages, copy and privacy rules, and the core-flows
+  map (what CI runs).
   `--external` adds every external link; `--external-only` checks only those.
 - `scripts/preview.cmd` (Windows), `scripts/preview.command` (macOS) or `scripts/preview.sh` (Linux): local preview at http://localhost:4173, the same as `python3 -m http.server 4173` (on Windows `py -3 -m http.server 4173`).
