@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 // Checks for shayanzafar.github.io. No dependencies, so it runs the same locally and in GitHub Actions.
 //
-//   node scripts/check-site.mjs                  structure, links between pages, copy and privacy rules, core flows
+//   node scripts/check-site.mjs                  structure, links between pages, copy and privacy rules, core flows,
+//                                                what isn't deployed, Claude's instruction files
 //   node scripts/check-site.mjs --external       ...plus every external link
 //   node scripts/check-site.mjs --external-only  only external links
 //   --root <dir>                                 check a different folder (used to test the checks)
 //
 // Exits with code 1 if anything fails. In GitHub Actions, problems show up as annotations on the run.
 
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { instructionReport } from './instruction-files.mjs';
 
 const argv = process.argv.slice(2);
 const ROOT = resolve(argv.includes('--root') ? argv[argv.indexOf('--root') + 1] : join(dirname(fileURLToPath(import.meta.url)), '..'));
@@ -78,6 +81,19 @@ const SNAPSHOT_FIELDS = {
 // The core flows and the tests that cover each at every level; see checkCoreFlows().
 const CORE_FLOWS = 'docs/core-flows.md';
 const CORE_FLOW_COLUMNS = ['Flow', 'Unit', 'Integration', 'UI'];
+
+// What the Site workflow leaves out of the deployed site (its rsync --exclude list): Claude's instructions, the
+// documentation, scripts and tests. Visitors get only the pages and their assets.
+const SITE_WORKFLOW = '.github/workflows/site.yml';
+const NOT_DEPLOYED = ['.git', '.github', '.claude', 'scripts', 'docs', 'tests', '.gitignore', 'CLAUDE.md'];
+
+// Claude's instructions: CLAUDE.md, loaded with every request, and the .claude/rules/ files, each loaded only when
+// Claude touches a file its `paths` globs match. These budgets keep them from growing unnoticed: raise one only
+// with the owner's OK.
+const CLAUDE_MD = 'CLAUDE.md';
+const CLAUDE_MD_MAX_WORDS = 600;
+const RULES_DIR = '.claude/rules';
+const RULE_MAX_WORDS = 500; // each rules file, not counting its frontmatter
 
 const IN_ACTIONS = process.env.GITHUB_ACTIONS === 'true';
 const problems = [];
@@ -335,6 +351,52 @@ function checkCoreFlows() {
   return `Core flows: ${flows.length} flows, ${tests} tests named, ${gaps} gaps (allowed ${allowed})`;
 }
 
+function checkNotDeployed() {
+  if (!exists(SITE_WORKFLOW)) { error(SITE_WORKFLOW, 'is missing: it checks, builds and deploys the site'); return; }
+  const rsync = withoutLineComments(read(SITE_WORKFLOW)).split('\n').find((line) => /\brsync\b/.test(line)) ?? '';
+  for (const path of NOT_DEPLOYED) {
+    if (!rsync.includes(`--exclude '${path}'`)) error(SITE_WORKFLOW, `the Assemble site step must leave ${path} out of the deployed site (rsync --exclude '${path}')`);
+  }
+}
+
+/** Every file under `dir` (relative to ROOT, with forward slashes), leaving out .git and node_modules. */
+const walk = (dir) => readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((entry) => {
+  const rel = dir ? `${dir}/${entry.name}` : entry.name;
+  if (entry.isDirectory()) return ['.git', 'node_modules'].includes(entry.name) ? [] : walk(rel);
+  return entry.isFile() ? [rel] : [];
+});
+
+/**
+ * The repo's files as git sees them: tracked, plus new files it isn't told to ignore. Without git (or outside a
+ * repo), every file on disk with `git: false`, as ignored files can't be told apart then.
+ */
+function repoFiles() {
+  try {
+    const out = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    return { files: [...new Set(out.split('\0').filter(Boolean))], git: true };
+  } catch {
+    return { files: walk(''), git: false };
+  }
+}
+
+/** CLAUDE.md's word budget, and every .claude/rules/ file's paths and size. Returns the summary line. */
+function checkInstructionFiles() {
+  const { files, git } = repoFiles();
+  const ruleFiles = exists(RULES_DIR) ? walk(RULES_DIR).filter((file) => file.endsWith('.md')) : [];
+  for (const file of ruleFiles) {
+    if (git && !files.includes(file)) error(file, 'is ignored by git, so it never reaches the repo: un-ignore .claude/rules/ in .gitignore');
+  }
+  const { problems: found, claudeMdWords, ruleWords } = instructionReport({
+    claudeMd: exists(CLAUDE_MD) ? read(CLAUDE_MD) : null,
+    rules: ruleFiles.map((file) => ({ file, text: read(file) })),
+    files,
+    limits: { claudeMd: CLAUDE_MD_MAX_WORDS, rule: RULE_MAX_WORDS },
+  });
+  for (const { file, message } of found) error(file, message);
+  const rules = ruleFiles.length ? `, largest ${Math.max(...ruleWords)} of ${RULE_MAX_WORDS} words` : '';
+  return `Instructions for Claude: ${CLAUDE_MD} ${claudeMdWords} of ${CLAUDE_MD_MAX_WORDS} words; ${ruleFiles.length} rules file(s) in ${RULES_DIR}/${rules}`;
+}
+
 async function checkExternalLinks() {
   const links = new Map(); // url -> first page it appears on
   for (const page of PAGES.filter(exists)) {
@@ -366,15 +428,18 @@ async function checkExternalLinks() {
 }
 
 const started = Date.now();
-let coreFlows = null;
-if (CHECK_INTERNAL) { checkPages(); checkAssets(); checkGitHubSnapshot(); coreFlows = checkCoreFlows(); }
+const summaries = [];
+if (CHECK_INTERNAL) {
+  checkPages(); checkAssets(); checkGitHubSnapshot(); checkNotDeployed();
+  summaries.push(checkCoreFlows(), checkInstructionFiles());
+}
 const externalCount = CHECK_EXTERNAL ? await checkExternalLinks() : 0;
 
 for (const { level, file, message } of problems) {
   if (IN_ACTIONS) console.log(`::${level} file=${file}::${message}`);
   else console.log(`${level === 'error' ? '✗' : '!'} ${file}: ${message}`);
 }
-if (coreFlows) console.log(coreFlows);
+for (const line of summaries.filter(Boolean)) console.log(line);
 const errorCount = problems.filter((p) => p.level === 'error').length;
 const scope = [CHECK_INTERNAL && `${PAGES.length} pages`, CHECK_EXTERNAL && `${externalCount} external links`].filter(Boolean).join(' and ');
 console.log(errorCount

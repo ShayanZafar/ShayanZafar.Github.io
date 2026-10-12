@@ -10,7 +10,7 @@ Run the site's check script from the repo root, showing only the end of the outp
 
 `node scripts/check-site.mjs 2>&1 | tail -30`
 
-If the change added or changed an external link, run it again with `--external`. CI runs the same script on every push and pull request, and re-checks external links every Monday.
+If the change added or changed an external link, run it again with `--external`. If it touched `scripts/` or `tests/`, also run the unit tests: `node --test 2>&1 | tail -12`. CI runs the same script on every push and pull request, and re-checks external links every Monday.
 
 Report each failure with the file and the rule it broke; don't paste the full log. If everything passes, say so in one line, quoting the script's last line.
 
