@@ -30,6 +30,7 @@ career summary. The full résumé lives in the downloadable PDF.
 | `.github/ISSUE_TEMPLATE/` | The forms for a new `debt` or `decision` issue |
 | `.github/workflows/site.yml` | Checks every change, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
+| `.github/workflows/claude-backlog.yml` | When you comment on a `decision` or `debt` issue, Claude records your answer in `docs/decisions.md`, does the work it calls for and opens a pull request (the `backlog` skill; not deployed) |
 | `.github/workflows/codeql.yml` | CodeQL scans the JavaScript for security problems on every push and weekly |
 | `.github/dependabot.yml` | Monthly update pull requests for the GitHub Actions the workflows use |
 | `.github/pull_request_template.md` | The checklist every pull request starts from |
