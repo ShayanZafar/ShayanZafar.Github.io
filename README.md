@@ -195,7 +195,7 @@ procedures Claude follows when one is called for.
 
 | Rules file | Loads when Claude touches |
 | --- | --- |
-| `.claude/rules/resume-print.md` (the résumé PDF) | `index.html`, `assets/css/styles.css`, `.github/workflows/site.yml` |
+| `.claude/rules/resume-print.md` (the résumé PDF) | `index.html`, `assets/css/styles.css`, `assets/js/main.js` (Chrome runs it when the PDF is made), `.github/workflows/site.yml` |
 | `.claude/rules/visit-statistics.md` (GoatCounter, `/admin/`) | any page (`**/*.html`) |
 
 Long instructions get followed less carefully, so a rule that matters for one area goes in that area's rules file
