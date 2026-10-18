@@ -108,7 +108,7 @@ test('How I work shows its three parts and links back to the home page', async (
     await toc.getByRole('link', { name }).click();
     await expect(page.getByRole('heading', { level: 2, name })).toBeInViewport();
   }
-  expect(site.external.filter((url) => url.includes('api.github.com'))).toEqual([]);
+  expect(site.external.filter((url) => new URL(url).hostname === 'api.github.com')).toEqual([]);
   await page.locator('.article__back').click();
   await expect(page).toHaveURL('/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Shayan Zafar Ahmad');
@@ -173,6 +173,6 @@ test('/admin/ links to the dashboard and shows whether this browser is counted',
   await expect(toggle).toHaveText('Count this browser again');
 
   // The owner's page is never counted.
-  expect(site.external.filter((url) => url.includes('goatcounter') || url.includes('gc.zgo.at'))).toEqual([]);
+  expect(site.external.filter((url) => ['gc.zgo.at', 'shayanzafar.goatcounter.com'].includes(new URL(url).hostname))).toEqual([]);
   expect(site.counts).toEqual([]);
 });

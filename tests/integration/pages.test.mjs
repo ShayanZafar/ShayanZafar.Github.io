@@ -148,6 +148,9 @@ test("the print layout of the home page keeps the résumé's name, headings, dat
   assert.equal(readFileSync(join(ROOT, 'assets/Shayan_Zafar_Ahmad_Resume.pdf')).subarray(0, 5).toString(), '%PDF-');
 });
 
+/** A link's host name, or '' for a link that isn't http(s). */
+const hostOf = (href) => (/^https?:\/\//.test(href) ? new URL(href).hostname : '');
+
 const CAL = 'https://cal.com/shayan-zafar-ahmad/intro-call';
 const EMAIL = 'mailto:shayan.zafar.ahmad@gmail.com';
 const LINKEDIN = 'https://www.linkedin.com/in/shayan-zafar-ahmad-85351023/';
@@ -155,9 +158,9 @@ const LINKEDIN = 'https://www.linkedin.com/in/shayan-zafar-ahmad-85351023/';
 test('every intro-call, email and LinkedIn link on the public pages goes to one address and one click event', () => {
   const links = PUBLIC_PAGES.flatMap((file) => page(file).querySelectorAll('a[href]').map((a) => ({ file, a })));
   const kinds = [
-    { name: 'intro call', test: (h) => h.includes('cal.com'), href: CAL, event: 'request-intro-call' },
+    { name: 'intro call', test: (h) => hostOf(h) === 'cal.com', href: CAL, event: 'request-intro-call' },
     { name: 'email', test: (h) => h.startsWith('mailto:'), href: EMAIL, event: 'email' },
-    { name: 'LinkedIn', test: (h) => h.includes('linkedin.com/in/'), href: LINKEDIN, event: 'linkedin' },
+    { name: 'LinkedIn', test: (h) => ['linkedin.com', 'www.linkedin.com'].includes(hostOf(h)) && new URL(h).pathname.startsWith('/in/'), href: LINKEDIN, event: 'linkedin' },
   ];
   for (const { name, test: isKind, href, event } of kinds) {
     const found = links.filter(({ a }) => isKind(a.href));
