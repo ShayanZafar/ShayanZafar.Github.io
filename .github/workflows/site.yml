@@ -30,6 +30,19 @@ jobs:
       - name: Unit and integration tests (tests/unit, tests/integration)
         run: node --test
 
+  ui:
+    name: UI tests (Playwright)
+    # Every push, pull request, manual and scheduled run: the build below needs it, so nothing deploys without it.
+    # Playwright comes through npx (tests/ui/run.sh pins its version); nothing is installed in the repo.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Playwright's Chromium
+        run: tests/ui/run.sh install --with-deps
+      - name: UI tests (tests/ui)
+        run: tests/ui/run.sh
+
   links:
     name: Check external links
     # Every push, pull request and manual run, and the Monday run; not the daily redeploy.
@@ -41,7 +54,7 @@ jobs:
 
   build:
     name: Build site and résumé PDF
-    needs: check
+    needs: [check, ui]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.schedule == '47 11 * * *'
     runs-on: ubuntu-latest
     permissions:

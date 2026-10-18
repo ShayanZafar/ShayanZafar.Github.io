@@ -25,15 +25,16 @@ career summary. The full résumé lives in the downloadable PDF.
 | `CLAUDE.md` | Claude Code's standing instructions for the site (rules, the definition of done, commands), loaded with every request and kept within 600 words (not deployed; see [Instructions for Claude](#instructions-for-claude)) |
 | `.claude/rules/` | Claude's rules for one area each, loaded only when Claude touches the files they're for: `resume-print.md` and `visit-statistics.md` (not deployed) |
 | `scripts/preview.cmd`, `scripts/preview.command`, `scripts/preview.sh` | Double-click (Windows, macOS) or run (Linux) to preview the site at http://localhost:4173 (not deployed) |
-| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot, the core-flows map, what isn't deployed, Claude's instruction files), run locally and on every push |
+| `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot, the core-flows map, what isn't deployed, that the tests run, Claude's instruction files), run locally and on every push |
 | `scripts/instruction-files.mjs` | The pure parts of the check of Claude's instruction files (word counts, `paths` globs), used by `check-site.mjs` and unit-tested (not deployed) |
 | `tests/unit/` | Unit tests: one module each (`main.js`, a page's own script, the print layout, the checks' `instruction-files.mjs`), with no network. Run with `node --test` (Node's built-in test runner, no packages) locally and on every push and pull request (not deployed) |
 | `tests/integration/` | Integration tests: `main.js` on the real pages, the pages with the stylesheet, the résumé PDF and each other, GitHub's API and the snapshot played by stand-ins. Run with `node --test` like the unit tests (not deployed) |
+| `tests/ui/` | UI tests: Playwright drives Chromium against the site served by `python3 -m http.server`, with GitHub, GoatCounter, Google Fonts and the linked sites played by the stand-ins in `stand-ins.js`. `run.sh` runs them with Playwright fetched by `npx` at a pinned version, so nothing is installed in the repo; CI runs them on every push and pull request (not deployed) |
 | `tests/support/` | What the unit and integration tests run the pages' scripts with: `mini-dom.mjs`, a small stand-in for the browser's DOM, and `browser.mjs`, a fixed clock and stand-ins for fetch, location and localStorage (not deployed) |
 | `docs/core-flows.md` | The core flows a visitor or you rely on, each with the unit, integration and UI tests that cover it, and how many gaps are still allowed (not deployed) |
 | `docs/decisions.md` | Decisions you made, one line each (date, decision, why, issue); pending decisions and debt are GitHub issues labelled `decision` and `debt` (not deployed) |
 | `.github/ISSUE_TEMPLATE/` | The forms for a new `debt` or `decision` issue |
-| `.github/workflows/site.yml` | Checks every change and runs the unit and integration tests, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
+| `.github/workflows/site.yml` | Checks every change and runs the unit, integration and UI tests, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks and tests pass; redeploys daily to keep the snapshot fresh |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
 | `.github/workflows/claude-backlog.yml` | When you comment on a `decision` or `debt` issue, Claude records your answer in `docs/decisions.md`, does the work it calls for and opens a pull request (the `backlog` skill; not deployed) |
 | `.github/workflows/auto-merge.yml` | Merges a bot's pull request (Dependabot's minor and patch updates) once every check on it has passed; yours are never touched |
@@ -117,8 +118,8 @@ To test the page with a snapshot, save one as `assets/data/github.json` (git-ign
 
 ## Checks and deployment
 
-The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `master`, on every pull request (step 1
-only) and daily at 7:47 Toronto time (EDT):
+The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `master`, on every pull request (steps 1
+and 2 only) and daily at 7:47 Toronto time (EDT):
 
 1. **Checks** (`scripts/check-site.mjs`): every local link, image and anchor resolves; one `<h1>` per page; no
    duplicate ids; images have alt text; new-tab links are safe; `?v=` asset versions match across pages; and the
@@ -135,14 +136,21 @@ only) and daily at 7:47 Toronto time (EDT):
    within 600 words, and each `.claude/rules/` file lists the files it's for under `paths` (every glob must match a
    file in the repo), stays within 500 words, not counting that list, and isn't ignored by git. Then the unit
    tests (`tests/unit/`) and the integration tests (`tests/integration/`) run with `node --test`.
-2. **GitHub snapshot:** fetches what the Projects section shows (the commits of each `data-gh-commits` repo and the
+   Tests run: the workflow runs `node --test` and `tests/ui/run.sh` on every pull request, its build job needs both
+   test jobs, `run.sh` pins an exact Playwright version, and the repo holds no npm package (`package.json`, lockfiles,
+   `node_modules`).
+2. **UI tests** (`tests/ui/`, a job of its own): `tests/ui/run.sh install --with-deps` fetches Playwright's Chromium,
+   then `tests/ui/run.sh` runs every UI test against the site served by `python3 -m http.server`. Nothing outside the
+   site is called: GitHub, GoatCounter and the linked sites are stand-ins. Playwright (Apache-2.0) comes through `npx`
+   at the version pinned in `run.sh`; Dependabot doesn't see it, so bump it there by hand.
+3. **GitHub snapshot:** fetches what the Projects section shows (the commits of each `data-gh-commits` repo and the
    repos of the `data-gh-repos` user, both read from `index.html`) with the workflow's own token, keeps only the
    fields `main.js` uses and writes `assets/data/github.json`. The checks then run again with it in place. If a fetch
    or a check fails, the run shows a warning and the site deploys without the file, so browsers call the API instead.
-3. **Résumé PDF:** rebuilt from the page's print layout with headless Chrome, then verified: the name, section
+4. **Résumé PDF:** rebuilt from the page's print layout with headless Chrome, then verified: the name, section
    headings, dates and "T-SQL" must survive in the text layer, there must be no phone number, and it warns if the
    PDF runs past 2 pages.
-4. **Deploy:** publishes to GitHub Pages only if the checks pass.
+5. **Deploy:** publishes to GitHub Pages only if the checks and all three levels of tests pass.
 
 The daily run keeps the snapshot under a day old without a push. GitHub turns off scheduled runs in a repo that has
 had no pushes for 60 days; turn them back on under **Actions → Site → Enable workflow**. Until then the page falls
@@ -157,6 +165,14 @@ Run the checks before pushing (add `--external` to include external links), and 
 ```bash
 node scripts/check-site.mjs
 node --test
+```
+
+CI runs the UI tests. To run them yourself (bash, or Git Bash on Windows, with Node and Python 3), download
+Playwright's Chromium once, then run them; any other arguments go to `playwright test`, such as `-g "404"` for one test:
+
+```bash
+tests/ui/run.sh install
+tests/ui/run.sh
 ```
 
 **Setup:** GitHub Pages is set to deploy from **GitHub Actions** (Settings → Pages → Build and deployment → Source), so
