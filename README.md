@@ -27,11 +27,13 @@ career summary. The full résumé lives in the downloadable PDF.
 | `scripts/preview.cmd`, `scripts/preview.command`, `scripts/preview.sh` | Double-click (Windows, macOS) or run (Linux) to preview the site at http://localhost:4173 (not deployed) |
 | `scripts/check-site.mjs` | Site checks (links, structure, copy and privacy rules, the GitHub snapshot, the core-flows map, what isn't deployed, Claude's instruction files), run locally and on every push |
 | `scripts/instruction-files.mjs` | The pure parts of the check of Claude's instruction files (word counts, `paths` globs), used by `check-site.mjs` and unit-tested (not deployed) |
-| `tests/unit/` | Unit tests of the checks, run with `node --test` (Node's built-in test runner, no packages) locally and on every push (not deployed) |
+| `tests/unit/` | Unit tests: one module each (`main.js`, a page's own script, the print layout, the checks' `instruction-files.mjs`), with no network. Run with `node --test` (Node's built-in test runner, no packages) locally and on every push and pull request (not deployed) |
+| `tests/integration/` | Integration tests: `main.js` on the real pages, the pages with the stylesheet, the résumé PDF and each other, GitHub's API and the snapshot played by stand-ins. Run with `node --test` like the unit tests (not deployed) |
+| `tests/support/` | What the unit and integration tests run the pages' scripts with: `mini-dom.mjs`, a small stand-in for the browser's DOM, and `browser.mjs`, a fixed clock and stand-ins for fetch, location and localStorage (not deployed) |
 | `docs/core-flows.md` | The core flows a visitor or you rely on, each with the unit, integration and UI tests that cover it, and how many gaps are still allowed (not deployed) |
 | `docs/decisions.md` | Decisions you made, one line each (date, decision, why, issue); pending decisions and debt are GitHub issues labelled `decision` and `debt` (not deployed) |
 | `.github/ISSUE_TEMPLATE/` | The forms for a new `debt` or `decision` issue |
-| `.github/workflows/site.yml` | Checks every change, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
+| `.github/workflows/site.yml` | Checks every change and runs the unit and integration tests, snapshots the GitHub activity, rebuilds the résumé PDF, and deploys only when the checks pass; redeploys daily to keep the snapshot fresh |
 | `.github/workflows/claude-code-review.yml` | Claude reviews each pull request once and comments inline, on Sonnet 5.5 (a different model from the one that usually writes the code) |
 | `.github/workflows/claude-backlog.yml` | When you comment on a `decision` or `debt` issue, Claude records your answer in `docs/decisions.md`, does the work it calls for and opens a pull request (the `backlog` skill; not deployed) |
 | `.github/workflows/auto-merge.yml` | Merges a bot's pull request (Dependabot's minor and patch updates) once every check on it has passed; yours are never touched |
@@ -115,8 +117,8 @@ To test the page with a snapshot, save one as `assets/data/github.json` (git-ign
 
 ## Checks and deployment
 
-The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `master` and daily at 7:47 Toronto time
-(EDT):
+The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `master`, on every pull request (step 1
+only) and daily at 7:47 Toronto time (EDT):
 
 1. **Checks** (`scripts/check-site.mjs`): every local link, image and anchor resolves; one `<h1>` per page; no
    duplicate ids; images have alt text; new-tab links are safe; `?v=` asset versions match across pages; and the
@@ -131,8 +133,8 @@ The **Site** workflow (`.github/workflows/site.yml`) runs on every push to `mast
    adds anything to the served files. Not deployed: the workflow's Assemble site step leaves out `.git`, `.github`,
    `.claude`, `scripts`, `docs`, `tests`, `.gitignore` and `CLAUDE.md`. Instructions for Claude: `CLAUDE.md` stays
    within 600 words, and each `.claude/rules/` file lists the files it's for under `paths` (every glob must match a
-   file in the repo), stays within 500 words, not counting that list, and isn't ignored by git. Then the checks' own
-   unit tests (`tests/unit/`) run with `node --test`.
+   file in the repo), stays within 500 words, not counting that list, and isn't ignored by git. Then the unit
+   tests (`tests/unit/`) and the integration tests (`tests/integration/`) run with `node --test`.
 2. **GitHub snapshot:** fetches what the Projects section shows (the commits of each `data-gh-commits` repo and the
    repos of the `data-gh-repos` user, both read from `index.html`) with the workflow's own token, keeps only the
    fields `main.js` uses and writes `assets/data/github.json`. The checks then run again with it in place. If a fetch
@@ -149,8 +151,8 @@ back to the API.
 External links are checked on every push and every Monday (not on the daily run). A broken one fails the run, and
 GitHub emails you, but it doesn't block the deploy.
 
-Run the checks before pushing (add `--external` to include external links), and the unit tests when you change
-`scripts/` or `tests/`:
+Run the checks before pushing (add `--external` to include external links), and the unit and integration tests
+(they take a second, with no network):
 
 ```bash
 node scripts/check-site.mjs

@@ -50,5 +50,5 @@ documentation, read when needed.
 - `node scripts/check-site.mjs`: structure, links between pages, copy and privacy rules, the core-flows map,
   what isn't deployed and the instruction files (what CI runs).
   `--external` adds every external link; `--external-only` checks only those.
-- `node --test`: the unit tests in `tests/unit/` (CI runs them too).
+- `node --test`: the unit and integration tests in `tests/unit/` and `tests/integration/` (CI runs them too).
 - `scripts/preview.cmd` (Windows), `scripts/preview.command` (macOS) or `scripts/preview.sh` (Linux): local preview at http://localhost:4173, the same as `python3 -m http.server 4173` (on Windows `py -3 -m http.server 4173`).
