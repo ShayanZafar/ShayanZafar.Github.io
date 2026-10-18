@@ -2,8 +2,8 @@
 
 Shayan Zafar Ahmad's personal site, live at https://shayanzafar.github.io/. A static site with no build
 step and no dependencies: HTML, one stylesheet and a little JavaScript, served as they are by GitHub Pages.
-`README.md` is the full guide (what each file is for, how editing, visit statistics and deployment work);
-read it before changing anything.
+`README.md` is the guide for people (what each file is for, how editing, visit statistics and deployment work);
+read the section a change touches.
 
 Instructions for Claude are this file (at most 600 words, checked by `scripts/check-site.mjs`) and
 `.claude/rules/` (one area each, loaded only when Claude touches a file its `paths` match); everything else is
