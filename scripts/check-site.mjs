@@ -2,7 +2,7 @@
 // Checks for shayanzafar.github.io. No dependencies, so it runs the same locally and in GitHub Actions.
 //
 //   node scripts/check-site.mjs                  structure, links between pages, copy and privacy rules, core flows,
-//                                                what isn't deployed, Claude's instruction files
+//                                                what isn't deployed, that the tests run, Claude's instruction files
 //   node scripts/check-site.mjs --external       ...plus every external link
 //   node scripts/check-site.mjs --external-only  only external links
 //   --root <dir>                                 check a different folder (used to test the checks)
@@ -86,6 +86,13 @@ const CORE_FLOW_COLUMNS = ['Flow', 'Unit', 'Integration', 'UI'];
 // documentation, scripts and tests. Visitors get only the pages and their assets.
 const SITE_WORKFLOW = '.github/workflows/site.yml';
 const NOT_DEPLOYED = ['.git', '.github', '.claude', 'scripts', 'docs', 'tests', '.gitignore', 'CLAUDE.md'];
+
+// The tests of docs/core-flows.md run on every push and pull request, and the site deploys only when they pass: the
+// Site workflow runs the unit and integration tests (`node --test`) and the UI tests (tests/ui/run.sh, Playwright at a
+// pinned version through npx), and its build job needs both jobs. No npm package is ever added to the repo.
+const UI_TESTS = 'tests/ui/run.sh';
+const BUILD_NEEDS = ['check', 'ui'];
+const NO_PACKAGES = ['package.json', 'package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'node_modules'];
 
 // Claude's instructions: CLAUDE.md, loaded with every request, and the .claude/rules/ files, each loaded only when
 // Claude touches a file its `paths` globs match. These budgets keep them from growing unnoticed: raise one only
@@ -359,6 +366,25 @@ function checkNotDeployed() {
   }
 }
 
+/** The workflow runs every level of tests and deploys only after them; the repo holds no npm package. */
+function checkTestsRun(files) {
+  if (exists(SITE_WORKFLOW)) {
+    const workflow = withoutLineComments(read(SITE_WORKFLOW));
+    if (!/^\s+(?:- )?run: node --test\b/m.test(workflow)) error(SITE_WORKFLOW, 'must run the unit and integration tests (run: node --test)');
+    if (!new RegExp(`^\\s+(?:- )?run: ${UI_TESTS}\\s*$`, 'm').test(workflow)) error(SITE_WORKFLOW, `must run the UI tests (run: ${UI_TESTS})`);
+    if (!/^on:[\s\S]*^\s+pull_request:/m.test(workflow)) error(SITE_WORKFLOW, 'must run on every pull request');
+    const build = workflow.match(/^ {2}build:\n((?: {4}.*\n|\s*\n)*)/m)?.[1] ?? '';
+    const needs = (build.match(/^ {4}needs: *\[([^\]]*)\]/m)?.[1] ?? build.match(/^ {4}needs: *(\S+)/m)?.[1] ?? '').split(',').map((n) => n.trim());
+    for (const job of BUILD_NEEDS) if (!needs.includes(job)) error(SITE_WORKFLOW, `the build job must need the ${job} job, so the site deploys only after its tests pass`);
+  }
+  if (!exists(UI_TESTS)) error(UI_TESTS, 'is missing: it runs the UI tests');
+  else if (!/^version="\$\{PLAYWRIGHT_VERSION:-\d+\.\d+\.\d+\}"$/m.test(read(UI_TESTS))) error(UI_TESTS, 'must pin an exact Playwright version (version="${PLAYWRIGHT_VERSION:-X.Y.Z}")');
+  for (const file of files) {
+    const name = file.split('/');
+    if (name.some((part) => NO_PACKAGES.includes(part))) error(file, 'no npm packages in the repo: the site has no build step or dependencies, and Playwright runs through npx');
+  }
+}
+
 /** Every file under `dir` (relative to ROOT, with forward slashes), leaving out .git and node_modules. */
 const walk = (dir) => readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((entry) => {
   const rel = dir ? `${dir}/${entry.name}` : entry.name;
@@ -430,7 +456,7 @@ async function checkExternalLinks() {
 const started = Date.now();
 const summaries = [];
 if (CHECK_INTERNAL) {
-  checkPages(); checkAssets(); checkGitHubSnapshot(); checkNotDeployed();
+  checkPages(); checkAssets(); checkGitHubSnapshot(); checkNotDeployed(); checkTestsRun(repoFiles().files);
   summaries.push(checkCoreFlows(), checkInstructionFiles());
 }
 const externalCount = CHECK_EXTERNAL ? await checkExternalLinks() : 0;
